@@ -1,1292 +1,1575 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>BILIK GERAKAN - Health Dashboard</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --secondary: #06b6d4;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --dark: #0f172a;
-            --gray-50: #f8fafc;
-            --gray-100: #f1f5f9;
-            --gray-200: #e2e8f0;
-            --gray-300: #cbd5e1;
-            --gray-400: #94a3b8;
-            --gray-500: #64748b;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --gray-800: #1e293b;
-            --gray-900: #0f172a;
+            --green: #38a832;
+            --green-dark: #228b22;
+            --green-soft: #eaf8e9;
+            --blue: #3b82f6;
+            --red: #ef4444;
+            --orange: #f59e0b;
+            --purple: #8b5cf6;
+            --text: #111827;
+            --muted: #8b8b8b;
+            --line: #ececec;
+            --bg: #f7f8f6;
+            --card: #ffffff;
+            --shadow: 0 18px 45px rgba(0,0,0,0.08);
+            --shadow-soft: 0 10px 30px rgba(0,0,0,0.055);
+            --radius-lg: 30px;
+            --radius-md: 22px;
+            --radius-sm: 16px;
         }
-        
+
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            color: var(--gray-800);
+            font-family: "Inter", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(56,168,50,0.10), transparent 35%),
+                linear-gradient(135deg, #f5f7f3 0%, #ffffff 50%, #f2f7f0 100%);
+            color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 22px;
         }
-        
-        .container {
+
+        .app-shell {
             max-width: 1800px;
             margin: 0 auto;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 34px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.08);
+            overflow: hidden;
         }
-        
-        /* ===== HEADER ===== */
-        .header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.3);
+
+        /* TOP WINDOW BAR */
+        .window-bar {
+            height: 70px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 30px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-        }
-        
-        .header-left {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .header-left h1 {
-            font-size: 3em;
-            font-weight: 800;
-            margin-bottom: 5px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .header-left p {
-            font-size: 1.1em;
-            opacity: 0.95;
-            font-weight: 300;
-            letter-spacing: 0.5px;
-        }
-        
-        .header-right {
-            display: flex;
-            gap: 30px;
-            position: relative;
-            z-index: 1;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-        
-        .status-card {
-            background: rgba(255, 255, 255, 0.15);
+            padding: 0 30px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255,255,255,0.7);
             backdrop-filter: blur(10px);
-            padding: 15px 25px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .traffic {
             display: flex;
-            align-items: center;
             gap: 12px;
+            align-items: center;
         }
-        
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            background: var(--success);
+
+        .dot {
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            animation: pulse 2s infinite;
-            box-shadow: 0 0 10px var(--success);
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.8; }
+
+        .dot.red { background: #ff4b4b; }
+        .dot.yellow { background: #ffd400; }
+        .dot.green { background: #31d843; }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            color: #888;
+            font-size: 20px;
         }
-        
-        /* ===== MAIN GRID ===== */
-        .main-grid {
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d1fadf, #fff);
+            border: 2px solid white;
+            box-shadow: var(--shadow-soft);
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            place-items: center;
+            font-size: 20px;
         }
-        
-        /* ===== FILTER SECTION ===== */
-        .filter-card {
-            grid-column: 1 / -1;
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border-top: 4px solid var(--primary);
+
+        /* NAV */
+        .nav {
+            min-height: 92px;
+            display: flex;
+            align-items: center;
+            padding: 0 34px;
+            gap: 48px;
+            border-bottom: 1px solid var(--line);
+            background: #fff;
         }
-        
-        .filter-title {
-            font-size: 1.1em;
-            font-weight: 700;
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 260px;
+        }
+
+        .brand-logo {
+            width: 54px;
+            height: 38px;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #b8f5b3, var(--green));
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 28px;
+            font-weight: 900;
+            box-shadow: 0 10px 25px rgba(56,168,50,0.25);
+        }
+
+        .brand h1 {
+            font-size: 26px;
+            color: var(--green-dark);
+            letter-spacing: -0.04em;
+        }
+
+        .nav-links {
+            flex: 1;
+            display: flex;
+            gap: 44px;
+            align-items: center;
+            color: #8d8d8d;
+            font-size: 21px;
+            font-weight: 500;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .nav-links span.active {
+            color: #111;
+            font-weight: 800;
+        }
+
+        /* MAIN LAYOUT */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1.05fr 1.1fr 1fr;
+            gap: 24px;
+            padding: 28px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(0,0,0,0.035);
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.04em;
             margin-bottom: 20px;
-            color: var(--gray-800);
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
-        
-        .filter-title i {
-            color: var(--primary);
-        }
-        
-        .filter-group {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .filter-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex: 1;
-            min-width: 250px;
-        }
-        
-        .filter-label {
-            font-weight: 600;
-            color: var(--gray-700);
-            font-size: 0.95em;
-        }
-        
-        .slider {
-            flex: 1;
-            height: 8px;
-            border-radius: 5px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-            cursor: pointer;
-        }
-        
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: white;
-            border: 3px solid var(--primary);
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-            transition: all 0.3s ease;
-        }
-        
-        .slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
-        }
-        
-        .slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: white;
-            border: 3px solid var(--primary);
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-        }
-        
-        .filter-value {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 700;
-            min-width: 90px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-        }
-        
-        .clear-btn {
-            background: linear-gradient(135deg, var(--danger), #dc2626);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: none;
-            font-size: 0.9em;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-        
-        .clear-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
-        }
-        
-        .clear-btn.show {
-            display: inline-block;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        /* ===== KPI CARDS ===== */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            grid-column: 1 / -1;
-            margin-bottom: 30px;
-        }
-        
-        .kpi-card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
+
+        /* LEFT DIAGNOSIS HISTORY */
+        .diagnosis-panel {
+            padding: 28px;
+            min-height: 750px;
             position: relative;
             overflow: hidden;
-            border: 2px solid transparent;
         }
-        
-        .kpi-card::before {
-            content: '';
+
+        .diagnosis-layout {
+            display: grid;
+            grid-template-columns: 95px 1fr;
+            gap: 16px;
+            min-height: 620px;
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-top: 30px;
+            gap: 22px;
+            color: #8f8f8f;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.5s ease;
+            left: 13px;
+            top: 42px;
+            bottom: 30px;
+            width: 2px;
+            border-left: 2px dashed #bcbcbc;
         }
-        
-        .kpi-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.15);
-            transform: translateY(-5px);
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            z-index: 2;
+            font-size: 17px;
         }
-        
-        .kpi-card:hover::before {
-            transform: scaleX(1);
+
+        .timeline-bullet {
+            width: 13px;
+            height: 13px;
+            background: #aaa;
+            border-radius: 50%;
         }
-        
-        .kpi-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 12px;
+
+        .timeline-item.active {
+            color: #111;
+            font-weight: 700;
+        }
+
+        .timeline-item.active .timeline-bullet {
+            background: #111;
+        }
+
+        .body-area {
+            position: relative;
+            min-height: 600px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8em;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
-        
-        .kpi-label {
-            color: var(--gray-600);
-            font-size: 0.85em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
+
+        .human-figure {
+            width: 260px;
+            max-width: 80%;
+            filter: drop-shadow(0 18px 25px rgba(0,0,0,0.08));
         }
-        
-        .kpi-value {
-            font-size: 2.8em;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
-        
-        .kpi-change {
-            font-size: 0.9em;
-            color: var(--success);
-            font-weight: 600;
-        }
-        
-        /* ===== CHARTS ===== */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 30px;
-            grid-column: 1 / -1;
-            margin-bottom: 30px;
-        }
-        
-        .chart-card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-        
-        .chart-card:hover {
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-            border-color: var(--primary);
-            transform: translateY(-5px);
-        }
-        
-        .chart-card.interactive cursor {
+
+        .hotspot {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--green);
+            border: 6px solid white;
+            box-shadow: 0 8px 22px rgba(56,168,50,0.35);
             cursor: pointer;
+            transition: 0.25s ease;
+            z-index: 4;
         }
-        
-        .chart-title {
-            font-size: 1.2em;
-            font-weight: 700;
-            color: var(--gray-800);
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--gray-100);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+
+        .hotspot:hover {
+            transform: scale(1.18);
         }
-        
-        .chart-title i {
-            color: var(--primary);
-            font-size: 1.3em;
+
+        .hotspot .tip {
+            display: none;
+            position: absolute;
+            left: 34px;
+            top: -6px;
+            white-space: nowrap;
+            background: #111;
+            color: #fff;
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 8px;
         }
-        
-        .chart-container {
-            position: relative;
-            height: 350px;
+
+        .hotspot:hover .tip {
+            display: block;
         }
-        
-        /* ===== MAP & SIDEBAR ===== */
-        .map-section {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
-            grid-column: 1 / -1;
-            margin-bottom: 30px;
+
+        .h1 { top: 90px; right: 112px; }
+        .h2 { top: 205px; left: 120px; }
+        .h3 { top: 185px; right: 92px; }
+        .h4 { top: 310px; right: 76px; }
+        .h5 { top: 382px; left: 92px; }
+
+        .complaint-card {
+            position: absolute;
+            left: 130px;
+            right: 20px;
+            bottom: 105px;
+            background: rgba(255,255,255,0.96);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: 18px;
+            z-index: 5;
         }
-        
-        .map-card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
+
+        .complaint-card p {
+            font-size: 15px;
+            margin-bottom: 10px;
         }
-        
-        #map {
+
+        .complaint-card .muted {
+            color: var(--muted);
+        }
+
+        .show-detail {
             width: 100%;
-            height: 450px;
-            border-radius: 12px;
-            border: 2px solid var(--gray-100);
-        }
-        
-        .sidebar-card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border-top: 4px solid var(--secondary);
-        }
-        
-        .sidebar-title {
-            font-size: 1.1em;
+            border: none;
+            background: var(--green);
+            color: white;
+            border-radius: 9px;
+            height: 48px;
+            font-size: 16px;
             font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--gray-800);
+            cursor: pointer;
+            margin-top: 8px;
+            transition: 0.25s;
+        }
+
+        .show-detail:hover {
+            background: var(--green-dark);
+            transform: translateY(-1px);
+        }
+
+        .system-legend {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            padding-top: 20px;
+            font-size: 14px;
+            color: #777;
         }
-        
-        .sidebar-title i {
-            color: var(--secondary);
+
+        .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--green);
+            border-radius: 50%;
+            margin-right: 7px;
         }
-        
+
+        /* CENTER */
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .metric-card {
+            min-height: 170px;
+            padding: 24px;
+            border-radius: 22px;
+            background: #fff;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(0,0,0,0.035);
+            transition: 0.25s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .metric-card.primary {
+            background: var(--green);
+            color: white;
+            transform: rotate(-4deg);
+            box-shadow: 0 20px 35px rgba(56,168,50,0.25);
+        }
+
+        .metric-card.primary:hover {
+            transform: rotate(-2deg) translateY(-3px);
+        }
+
+        .metric-icon {
+            font-size: 32px;
+            margin-bottom: 18px;
+        }
+
+        .metric-title {
+            font-size: 18px;
+            font-weight: 750;
+            margin-bottom: 26px;
+        }
+
+        .metric-sub {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 30px;
+            font-weight: 850;
+            letter-spacing: -0.05em;
+        }
+
+        .metric-unit {
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0.7;
+        }
+
+        .map-activity-card {
+            padding: 22px;
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .recent-box {
+            padding: 8px;
+        }
+
         .recent-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        
+
         .recent-item {
-            padding: 15px;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(6, 182, 212, 0.05));
-            border-radius: 10px;
-            border-left: 4px solid var(--primary);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .recent-item:hover {
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(6, 182, 212, 0.1));
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-        }
-        
-        .recent-name {
-            font-weight: 700;
-            color: var(--gray-800);
-            margin-bottom: 5px;
-            font-size: 0.95em;
-        }
-        
-        .recent-diagnosis {
-            font-size: 0.85em;
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .recent-location {
-            font-size: 0.8em;
-            color: var(--gray-500);
-        }
-        
-        /* ===== TABLE ===== */
-        .table-section {
-            grid-column: 1 / -1;
-            background: white;
+            padding: 12px;
             border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
+            background: #fbfbfb;
+            border: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: 0.25s;
         }
-        
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid var(--gray-100);
-            flex-wrap: wrap;
-            gap: 20px;
+
+        .recent-item:hover {
+            background: var(--green-soft);
+            transform: translateX(4px);
         }
-        
-        .table-title {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: var(--gray-800);
+
+        .recent-top {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 8px;
         }
-        
-        .table-title i {
-            color: var(--primary);
+
+        .case-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d9ffd8, #fff);
+            display: grid;
+            place-items: center;
+            color: var(--green-dark);
+            font-weight: 800;
         }
-        
-        .table-wrapper {
+
+        .case-id {
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .recent-meta {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .recent-diagnosis {
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        #map {
+            height: 270px;
+            border-radius: 22px;
+            overflow: hidden;
+            border: none;
+            z-index: 1;
+        }
+
+        /* RIGHT */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .stat-card {
+            padding: 26px;
+            min-height: 360px;
+        }
+
+        .chart-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 14px;
+        }
+
+        .chart-legend {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #777;
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+
+        .tiny-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .week-pill {
+            border: 1px solid var(--line);
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .chart-container {
+            height: 285px;
+            position: relative;
+        }
+
+        .progress-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .progress-card, .filter-card {
+            padding: 24px;
+        }
+
+        .progress-circle {
+            width: 142px;
+            height: 142px;
+            margin: 15px auto;
+            border-radius: 50%;
+            background: conic-gradient(var(--green) 0deg, var(--green) 270deg, #edf0f2 270deg);
+            display: grid;
+            place-items: center;
+            position: relative;
+        }
+
+        .progress-circle::before {
+            content: "";
+            position: absolute;
+            width: 104px;
+            height: 104px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .progress-circle span {
+            position: relative;
+            font-size: 30px;
+            font-weight: 850;
+        }
+
+        .progress-note {
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+            line-height: 1.35;
+        }
+
+        .filter-mini {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .slider {
+            width: 100%;
+            accent-color: var(--green);
+        }
+
+        .filter-value {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 9px 13px;
+            background: var(--green-soft);
+            color: var(--green-dark);
+            border-radius: 10px;
+            font-weight: 800;
+            width: fit-content;
+        }
+
+        .clear-btn {
+            border: none;
+            background: #111;
+            color: #fff;
+            padding: 11px 16px;
+            border-radius: 12px;
+            font-weight: 750;
+            cursor: pointer;
+            display: none;
+            transition: 0.25s;
+        }
+
+        .clear-btn.show {
+            display: inline-block;
+        }
+
+        .clear-btn:hover {
+            background: var(--red);
+        }
+
+        /* TABLE */
+        .table-section {
+            grid-column: 1 / -1;
+            padding: 26px;
+        }
+
+        .table-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            height: 42px;
+            min-width: 270px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 10px;
+            color: #999;
+            background: #fff;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-family: inherit;
+        }
+
+        .table-wrap {
             overflow-x: auto;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 900px;
         }
-        
-        thead {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-        }
-        
+
         th {
-            padding: 18px;
             text-align: left;
-            font-weight: 700;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
+            font-size: 14px;
+            color: #111;
+            font-weight: 800;
+            padding: 18px 16px;
+            border-bottom: 1px solid var(--line);
         }
-        
+
         td {
-            padding: 16px 18px;
-            border-bottom: 1px solid var(--gray-100);
-            font-size: 0.95em;
+            padding: 18px 16px;
+            border-bottom: 1px solid #f1f1f1;
+            color: #4b4b4b;
+            font-size: 15px;
         }
-        
-        tbody tr {
-            transition: all 0.3s ease;
-        }
-        
+
         tbody tr:hover {
-            background: var(--gray-50);
-            box-shadow: inset 0 0 10px rgba(37, 99, 235, 0.05);
+            background: #fbfbfb;
         }
-        
-        .severity-critical {
-            background: rgba(239, 68, 68, 0.1);
-            color: #dc2626;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 700;
+
+        .status-pill {
+            padding: 7px 11px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+            display: inline-block;
         }
-        
-        .severity-high {
-            background: rgba(245, 158, 11, 0.1);
-            color: #d97706;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 700;
+
+        .status-Aktif { background: #fff3d5; color: #b87900; }
+        .status-Pulih { background: #e9fbe7; color: #258b23; }
+        .status-Pemantauan { background: #eaf2ff; color: #1d60c8; }
+        .status-Kritikal { background: #ffe6e6; color: #d92323; }
+
+        .sev {
+            font-weight: 850;
+            padding: 7px 11px;
+            border-radius: 999px;
+            display: inline-block;
         }
-        
-        .severity-medium {
-            background: rgba(59, 130, 246, 0.1);
-            color: #1e40af;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 700;
-        }
-        
-        .severity-low {
-            background: rgba(16, 185, 129, 0.1);
-            color: #059669;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 700;
-        }
-        
-        /* ===== PAGINATION ===== */
+
+        .sev-low { background: #e9fbe7; color: #258b23; }
+        .sev-med { background: #fff3d5; color: #b87900; }
+        .sev-high { background: #ffe6e6; color: #d92323; }
+
         .pagination {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            margin-top: 25px;
             flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 18px;
         }
-        
+
         .pagination button {
-            padding: 10px 16px;
-            border: 2px solid var(--gray-200);
-            background: white;
-            color: var(--gray-700);
-            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: #fff;
+            min-width: 38px;
+            height: 38px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 0.95em;
+            font-weight: 800;
         }
-        
-        .pagination button:hover {
-            border-color: var(--primary);
-            background: var(--gray-50);
-        }
-        
+
         .pagination button.active {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            background: var(--green);
+            color: #fff;
+            border-color: var(--green);
         }
-        
-        /* ===== FOOTER ===== */
-        .footer {
-            text-align: center;
-            padding: 30px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border-top: 3px solid var(--primary);
-            color: var(--gray-600);
-        }
-        
-        .footer p {
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 1.05em;
-            color: var(--gray-800);
-        }
-        
-        .footer small {
-            opacity: 0.8;
-            font-size: 0.9em;
-        }
-        
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1400px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
+
+        /* RESPONSIVE */
+        @media (max-width: 1450px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
             }
-            .map-section {
-                grid-template-columns: 1fr;
+
+            .right-panel {
+                grid-column: 1 / -1;
+                display: grid;
+                grid-template-columns: 1.4fr 1fr;
+            }
+
+            .diagnosis-panel {
+                min-height: auto;
             }
         }
-        
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-                padding: 30px 20px;
+
+        @media (max-width: 1000px) {
+            body {
+                padding: 10px;
             }
-            
-            .header-left h1 {
-                font-size: 2em;
-            }
-            
-            .header-right {
-                justify-content: center;
-                width: 100%;
-            }
-            
-            .main-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .filter-item {
+
+            .nav {
                 flex-direction: column;
                 align-items: flex-start;
-                min-width: 100%;
+                padding: 24px;
+                gap: 20px;
             }
-            
-            .slider {
-                width: 100%;
+
+            .dashboard {
+                grid-template-columns: 1fr;
+                padding: 16px;
             }
-            
-            .kpi-grid {
+
+            .right-panel {
+                display: flex;
+                grid-column: auto;
+            }
+
+            .metric-grid,
+            .map-activity-card,
+            .progress-wrap {
                 grid-template-columns: 1fr;
             }
-            
-            .charts-grid {
+
+            .diagnosis-layout {
                 grid-template-columns: 1fr;
             }
-            
-            .map-section {
-                grid-template-columns: 1fr;
+
+            .timeline {
+                flex-direction: row;
+                overflow-x: auto;
             }
-            
-            #map {
-                height: 300px;
+
+            .timeline::before {
+                display: none;
             }
-            
-            table {
-                font-size: 0.85em;
+
+            .complaint-card {
+                position: static;
+                margin-top: 20px;
             }
-            
-            th, td {
-                padding: 10px 8px;
+
+            .human-figure {
+                width: 220px;
+            }
+
+            .hotspot {
+                display: none;
             }
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <div class="header-left">
-                <h1>🏥 BILIK GERAKAN</h1>
-                <p>Sistem Maklumat Kesihatan Pintar</p>
-            </div>
-            <div class="header-right">
-                <div class="status-card">
-                    <div class="status-dot"></div>
-                    <div>
-                        <div style="font-weight: 600; font-size: 0.95em;">Sistem Aktif</div>
-                        <div style="opacity: 0.8; font-size: 0.85em;">Real-time Monitoring</div>
-                    </div>
-                </div>
-                <div class="status-card">
-                    <i class="fas fa-user"></i>
-                    <div>
-                        <div style="font-weight: 600; font-size: 0.95em;">Pemerhati</div>
-                        <div style="opacity: 0.8; font-size: 0.85em;">Health Analytics Team</div>
-                    </div>
-                </div>
-            </div>
+<div class="app-shell">
+
+    <!-- WINDOW BAR -->
+    <div class="window-bar">
+        <div class="traffic">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
         </div>
-        
-        <!-- MAIN GRID -->
-        <div class="main-grid">
-            <!-- FILTER SECTION -->
-            <div class="filter-card">
-                <div class="filter-title">
-                    <i class="fas fa-sliders-h"></i>
-                    Tapisan & Pemilehan Data
-                </div>
-                <div class="filter-group">
-                    <div class="filter-item">
-                        <label class="filter-label"><i class="fas fa-calendar"></i> Minggu Epidemiologi:</label>
-                        <input type="range" id="weekSlider" min="0" max="52" value="0" class="slider">
-                        <span class="filter-value" id="filterValue">Semua</span>
-                    </div>
-                    <button class="clear-btn" id="clearBtn"><i class="fas fa-times"></i> Batal Semua Filter</button>
-                </div>
-            </div>
-            
-            <!-- KPI CARDS -->
-            <div class="kpi-card">
-                <div class="kpi-icon">📊</div>
-                <div class="kpi-label">Jumlah Kes</div>
-                <div class="kpi-value" id="totalCases">0</div>
-                <div class="kpi-change">Kes Berdaftar</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-icon">🔴</div>
-                <div class="kpi-label">Diagnosis Tertinggi</div>
-                <div class="kpi-value" id="topDiagnosis" style="font-size: 1.5em;">-</div>
-                <div class="kpi-change">Paling Banyak</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-icon">📍</div>
-                <div class="kpi-label">Kawasan Terjejas</div>
-                <div class="kpi-value" id="affectedLocations">0</div>
-                <div class="kpi-change">Bilangan Lokasi</div>
-            </div>
-            
-            <div class="kpi-card">
-                <div class="kpi-icon">⏰</div>
-                <div class="kpi-label">Kemaskini Terakhir</div>
-                <div class="kpi-value" id="lastUpdate" style="font-size: 1.6em;">--:--</div>
-                <div class="kpi-change">Masa Sebenar</div>
-            </div>
-            
-            <!-- CHARTS -->
-            <div class="chart-card interactive">
-                <div class="chart-title">
-                    <i class="fas fa-chart-bar"></i>
-                    Analisis Diagnosis
-                </div>
-                <div class="chart-container">
-                    <canvas id="diagnosisChart"></canvas>
-                </div>
-                <small style="color: var(--gray-500); margin-top: 10px;">💡 Klik untuk filter berdasarkan diagnosis</small>
-            </div>
-            
-            <div class="chart-card interactive">
-                <div class="chart-title">
-                    <i class="fas fa-chart-pie"></i>
-                    Taburan Jantina
-                </div>
-                <div class="chart-container">
-                    <canvas id="genderChart"></canvas>
-                </div>
-                <small style="color: var(--gray-500); margin-top: 10px;">💡 Klik untuk filter berdasarkan jantina</small>
-            </div>
-            
-            <div class="chart-card interactive">
-                <div class="chart-title">
-                    <i class="fas fa-chart-line"></i>
-                    Kumpulan Umur
-                </div>
-                <div class="chart-container">
-                    <canvas id="ageChart"></canvas>
-                </div>
-                <small style="color: var(--gray-500); margin-top: 10px;">💡 Klik untuk filter berdasarkan umur</small>
-            </div>
-            
-            <!-- MAP & SIDEBAR -->
-            <div class="map-section">
-                <div class="map-card">
-                    <div class="chart-title">
-                        <i class="fas fa-map"></i>
-                        Peta Taburan Kes Geografik
-                    </div>
-                    <div id="map"></div>
-                    <small style="color: var(--gray-500); margin-top: 15px; display: block;">💡 Klik pada penanda untuk filter berdasarkan lokasi</small>
-                </div>
-                
-                <div class="sidebar-card">
-                    <div class="sidebar-title">
-                        <i class="fas fa-history"></i>
-                        Pendaftaran Terkini
-                    </div>
-                    <div class="recent-list" id="recentList"></div>
-                </div>
-            </div>
-            
-            <!-- TABLE -->
-            <div class="table-section">
-                <div class="table-header">
-                    <div class="table-title">
-                        <i class="fas fa-table"></i>
-                        Jadual Maklumat Lengkap
-                    </div>
-                    <button class="clear-btn" id="clearBtn2" style="display: none;"><i class="fas fa-times"></i> Batal Filter</button>
-                </div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Nama</th>
-                                <th>Diagnosis</th>
-                                <th>Jantina</th>
-                                <th>Umur</th>
-                                <th>Kumpulan</th>
-                                <th>Lokasi</th>
-                                <th>Status</th>
-                                <th>Severity</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
-                <div class="pagination" id="pagination"></div>
-            </div>
-            
-            <!-- FOOTER -->
-            <div class="footer">
-                <p>🏥 BILIK GERAKAN - Sistem Maklumat Kesihatan Bersepadu</p>
-                <small>Diperkasa oleh Chart.js | Leaflet Maps | HTML5 + JavaScript | © 2024 Health Analytics</small>
-            </div>
+
+        <div class="top-actions">
+            <span>🔔</span>
+            <span>⚙️</span>
+            <div class="avatar">👨‍⚕️</div>
+            <strong style="font-size:18px;color:#777;">Bilik Gerakan</strong>
         </div>
     </div>
-    
-    <script>
-        // ===== DATA GENERATION =====
-        function generateData() {
-            const diseases = ['Demam Berdarah', 'Influenza', 'COVID-19', 'Malaria', 'Typhoid'];
-            const locations = ['Kuala Lumpur', 'Shah Alam', 'Petaling Jaya', 'Klang', 'Subang', 'Ampang', 'Selayang'];
-            const names = ['Ahmad Ali', 'Siti Nurhaliza', 'Budi Santoso', 'Nur Azizah', 'Rafi Hakim',
-                         'Fatimah Hassan', 'Mohd Zain', 'Noor Hafizah', 'Yusof Ibrahim', 'Zainab Mahmud'];
-            const genders = ['Lelaki', 'Perempuan'];
-            const statuses = ['Aktif', 'Pulih', 'Pemantauan', 'Kritikal'];
-            
-            const data = [];
-            for (let i = 0; i < 250; i++) {
-                const umur = Math.floor(Math.random() * 80) + 5;
-                let umurKumpulan;
-                if (umur <= 14) umurKumpulan = '14 dan ke bawah';
-                else if (umur <= 50) umurKumpulan = '15 - 50';
-                else umurKumpulan = '51 dan ke atas';
-                
-                data.push({
-                    Nama: names[Math.floor(Math.random() * names.length)],
-                    Diagnosis: diseases[Math.floor(Math.random() * diseases.length)],
-                    Jantina: genders[Math.floor(Math.random() * genders.length)],
-                    Umur: umur,
-                    Lokasi: locations[Math.floor(Math.random() * locations.length)],
-                    'Minggu Epid': Math.floor(Math.random() * 52) + 1,
-                    Status: statuses[Math.floor(Math.random() * statuses.length)],
-                    Severity: Math.floor(Math.random() * 9) + 1,
-                    Temperature: (Math.random() * 4 + 36.5).toFixed(1),
-                    Latitud: (Math.random() * 0.4 + 2.9).toFixed(4),
-                    Longitud: (Math.random() * 0.7 + 101.3).toFixed(4),
-                    Umur_Kumpulan: umurKumpulan
-                });
-            }
-            return data;
-        }
-        
-        const rawData = generateData();
-        let allData = [...rawData];
-        let filteredData = [...rawData];
-        let activeFilters = {};
-        let charts = {};
-        let map = null;
-        let markers = [];
-        let currentPage = 1;
-        const rowsPerPage = 10;
-        
-        const chartColors = {
-            'Demam Berdarah': '#ef4444',
-            'Influenza': '#f59e0b',
-            'COVID-19': '#3b82f6',
-            'Malaria': '#ec4899',
-            'Typhoid': '#8b5cf6'
-        };
-        
-        // ===== UPDATE KPIs =====
-        function updateKPIs() {
-            document.getElementById('totalCases').textContent = filteredData.length;
-            
-            const diagCount = {};
-            filteredData.forEach(d => {
-                diagCount[d.Diagnosis] = (diagCount[d.Diagnosis] || 0) + 1;
-            });
-            const topDiag = Object.keys(diagCount).sort((a, b) => diagCount[b] - diagCount[a])[0];
-            document.getElementById('topDiagnosis').textContent = topDiag || '-';
-            
-            document.getElementById('affectedLocations').textContent = 
-                new Set(filteredData.map(d => d.Lokasi)).size;
-        }
-        
-        // ===== UPDATE CHARTS =====
-        function updateDiagnosisChart() {
-            const diagCounts = {};
-            filteredData.forEach(d => {
-                diagCounts[d.Diagnosis] = (diagCounts[d.Diagnosis] || 0) + 1;
-            });
-            
-            if (charts.diagnosis) charts.diagnosis.destroy();
-            
-            const ctx = document.getElementById('diagnosisChart').getContext('2d');
-            const colors = Object.keys(diagCounts).map(d => chartColors[d] || '#999');
-            
-            charts.diagnosis = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(diagCounts),
-                    datasets: [{
-                        label: 'Bilangan Kes',
-                        data: Object.values(diagCounts),
-                        backgroundColor: colors,
-                        borderColor: colors.map(c => c + '40'),
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            color: '#1f2937',
-                            font: { weight: 'bold', size: 12 },
-                            anchor: 'end',
-                            align: 'end'
-                        }
-                    },
-                    scales: { 
-                        x: { beginAtZero: true, grid: { display: false } },
-                        y: { grid: { display: false } }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
-        }
-        
-        function updateGenderChart() {
-            const genderCounts = {};
-            filteredData.forEach(d => {
-                genderCounts[d.Jantina] = (genderCounts[d.Jantina] || 0) + 1;
-            });
-            
-            if (charts.gender) charts.gender.destroy();
-            
-            const ctx = document.getElementById('genderChart').getContext('2d');
-            charts.gender = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(genderCounts),
-                    datasets: [{
-                        data: Object.values(genderCounts),
-                        backgroundColor: ['#ef4444', '#3b82f6'],
-                        borderColor: '#fff',
-                        borderWidth: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        datalabels: {
-                            color: '#fff',
-                            font: { weight: 'bold', size: 14 },
-                            formatter: (value) => value
-                        }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
-        }
-        
-        function updateAgeChart() {
-            const ageCounts = {};
-            filteredData.forEach(d => {
-                ageCounts[d.Umur_Kumpulan] = (ageCounts[d.Umur_Kumpulan] || 0) + 1;
-            });
-            
-            if (charts.age) charts.age.destroy();
-            
-            const ctx = document.getElementById('ageChart').getContext('2d');
-            const labels = ['14 dan ke bawah', '15 - 50', '51 dan ke atas'];
-            const counts = labels.map(l => ageCounts[l] || 0);
-            
-            charts.age = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Bilangan Kes',
-                        data: counts,
-                        backgroundColor: ['#3b82f6', '#f59e0b', '#8b5cf6'],
-                        borderColor: ['#1e40af', '#d97706', '#6d28d9'],
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            color: '#1f2937',
-                            font: { weight: 'bold' },
-                            anchor: 'end',
-                            align: 'top'
-                        }
-                    },
-                    scales: { 
-                        y: { beginAtZero: true, grid: { display: false } },
-                        x: { grid: { display: false } }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
-        }
-        
-        function updateMap() {
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
-            
-            const locCounts = {};
-            filteredData.forEach(d => {
-                const key = `${d.Latitud},${d.Longitud}`;
-                if (!locCounts[key]) {
-                    locCounts[key] = { 
-                        count: 0, 
-                        lat: parseFloat(d.Latitud), 
-                        lng: parseFloat(d.Longitud), 
-                        diagnosis: d.Diagnosis 
-                    };
-                }
-                locCounts[key].count++;
-            });
-            
-            Object.values(locCounts).forEach(loc => {
-                const color = chartColors[loc.diagnosis] || '#999';
-                const radius = Math.sqrt(loc.count) * 5 + 8;
-                
-                const circle = L.circleMarker([loc.lat, loc.lng], {
-                    radius: radius,
-                    fillColor: color,
-                    color: color,
-                    weight: 2,
-                    opacity: 0.8,
-                    fillOpacity: 0.7
-                });
-                
-                circle.bindPopup(`<strong>${loc.diagnosis}</strong><br><strong>Kes:</strong> ${loc.count}`);
-                circle.addTo(map);
-                circle.on('click', () => {
-                    filterByLocation(loc.lat, loc.lng);
-                });
-                markers.push(circle);
-            });
-        }
-        
-        function updateRecent() {
-            const recent = filteredData.slice(-5).reverse();
-            const html = recent.map(r => `
-                <div class="recent-item">
-                    <div class="recent-diagnosis">${r.Diagnosis}</div>
-                    <div class="recent-name">${r.Nama}</div>
-                    <div class="recent-location"><i class="fas fa-map-marker-alt"></i> ${r.Lokasi}</div>
+
+    <!-- NAV -->
+    <div class="nav">
+        <div class="brand">
+            <div class="brand-logo">∞</div>
+            <h1>BilikGerakan</h1>
+        </div>
+
+        <div class="nav-links">
+            <span class="active">Overview</span>
+            <span>Kes Harian</span>
+            <span>Laporan Epid</span>
+            <span>Diagnosis</span>
+            <span>Lokasi</span>
+        </div>
+    </div>
+
+    <div class="dashboard">
+
+        <!-- LEFT PANEL -->
+        <section class="card diagnosis-panel">
+            <h2 class="section-title">Diagnosis History</h2>
+
+            <div class="diagnosis-layout">
+                <div class="timeline" id="weekTimeline"></div>
+
+                <div class="body-area">
+                    <!-- Simple original SVG body illustration -->
+                    <svg class="human-figure" viewBox="0 0 260 620" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#ffb2a8"/>
+                                <stop offset="100%" stop-color="#ffe0c7"/>
+                            </linearGradient>
+                        </defs>
+                        <ellipse cx="130" cy="596" rx="78" ry="17" fill="none" stroke="#cfcfcf" stroke-width="2"/>
+                        <circle cx="130" cy="62" r="40" fill="url(#bodyGrad)" stroke="#ff8a7a" stroke-width="5"/>
+                        <path d="M95 115 C80 155 73 220 76 310 C78 390 82 470 95 565" fill="none" stroke="#ff8a7a" stroke-width="30" stroke-linecap="round"/>
+                        <path d="M165 115 C180 155 187 220 184 310 C182 390 178 470 165 565" fill="none" stroke="#ff8a7a" stroke-width="30" stroke-linecap="round"/>
+                        <path d="M100 120 C78 165 65 250 50 350" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
+                        <path d="M160 120 C182 165 195 250 210 350" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
+                        <path d="M95 128 C120 105 140 105 165 128 C185 180 185 250 165 322 C145 345 115 345 95 322 C75 250 75 180 95 128Z" fill="#fff3ed" stroke="#ff8a7a" stroke-width="6"/>
+                        <path d="M105 330 C112 410 112 505 103 570" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
+                        <path d="M155 330 C148 410 148 505 157 570" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
+                        <path d="M120 120 L120 325" stroke="#ff6b60" stroke-width="4" opacity="0.6"/>
+                        <path d="M140 120 L140 325" stroke="#ff6b60" stroke-width="4" opacity="0.6"/>
+                    </svg>
+
+                    <div class="hotspot h1"><span class="tip"></span></div>
+                    <div class="hotspot h2"><span class="tip"></span></div>
+                    <div class="hotspot h3"><span class="tip"></span></div>
+                    <div class="hotspot h4"><span class="tip"></span></div>
+                    <div class="hotspot h5"><span class="tip"></span></div>
+
+                    <div class="complaint-card">
+                        <p><strong>Top Diagnosis:</strong> <span id="bodyTopDiagnosis">-</span></p>
+                        <p class="muted">Filtered Cases: <strong id="bodyCaseCount">0</strong></p>
+                        <button class="show-detail" onclick="clearAllFilters()">Show All Detail</button>
+                    </div>
                 </div>
-            `).join('');
-            document.getElementById('recentList').innerHTML = html || '<p style="color: var(--gray-500); text-align: center; padding: 20px;">Tiada rekod</p>';
-        }
-        
-        function updateTable() {
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const pageData = filteredData.slice(start, end);
-            
-            const html = pageData.map((r, i) => {
-                let severityClass = 'severity-low';
-                if (r.Severity >= 8) severityClass = 'severity-critical';
-                else if (r.Severity >= 6) severityClass = 'severity-high';
-                else if (r.Severity >= 4) severityClass = 'severity-medium';
-                
-                return `
-                    <tr>
-                        <td>${start + i + 1}</td>
-                        <td><strong>${r.Nama}</strong></td>
-                        <td>${r.Diagnosis}</td>
-                        <td>${r.Jantina}</td>
-                        <td>${r.Umur} thn</td>
-                        <td>${r.Umur_Kumpulan}</td>
-                        <td>${r.Lokasi}</td>
-                        <td><strong>${r.Status}</strong></td>
-                        <td><span class="${severityClass}">${r.Severity}/10</span></td>
-                    </tr>
-                `;
-            }).join('');
-            
-            document.getElementById('tableBody').innerHTML = html;
-            
-            const pages = Math.ceil(filteredData.length / rowsPerPage);
-            const paginationHtml = Array.from({length: pages}, (_, i) => i + 1)
-                .map(p => `<button ${p === currentPage ? 'class="active"' : ''} onclick="currentPage=${p}; updateTable();">${p}</button>`)
-                .join('');
-            document.getElementById('pagination').innerHTML = paginationHtml;
-        }
-        
-        // ===== FILTER FUNCTIONS =====
-        function filterByDiagnosis(diagnosis) {
-            activeFilters.diagnosis = diagnosis;
-            applyFilters();
-        }
-        
-        function filterByGender(gender) {
-            activeFilters.gender = gender;
-            applyFilters();
-        }
-        
-        function filterByAgeGroup(ageGroup) {
-            activeFilters.ageGroup = ageGroup;
-            applyFilters();
-        }
-        
-        function filterByLocation(lat, lng) {
-            activeFilters.location = { lat, lng };
-            applyFilters();
-        }
-        
-        function filterByWeek(week) {
-            activeFilters.week = parseInt(week);
-            applyFilters();
-        }
-        
-        function applyFilters() {
-            filteredData = allData.filter(record => {
-                if (activeFilters.diagnosis && record.Diagnosis !== activeFilters.diagnosis) return false;
-                if (activeFilters.gender && record.Jantina !== activeFilters.gender) return false;
-                if (activeFilters.ageGroup && record.Umur_Kumpulan !== activeFilters.ageGroup) return false;
-                if (activeFilters.week && record['Minggu Epid'] !== activeFilters.week) return false;
-                if (activeFilters.location) {
-                    const threshold = 0.01;
-                    const match = Math.abs(parseFloat(record.Latitud) - activeFilters.location.lat) < threshold &&
-                                 Math.abs(parseFloat(record.Longitud) - activeFilters.location.lng) < threshold;
-                    if (!match) return false;
-                }
-                return true;
+            </div>
+
+            <div class="system-legend">
+                <span><span class="legend-dot"></span>Diagnosis</span>
+                <span><span class="legend-dot"></span>Status</span>
+                <span><span class="legend-dot"></span>Lokasi</span>
+            </div>
+        </section>
+
+        <!-- CENTER PANEL -->
+        <main class="center-panel">
+
+            <div class="metric-grid">
+                <div class="metric-card primary">
+                    <div class="metric-icon">📊</div>
+                    <div class="metric-title">Jumlah Kes</div>
+                    <div class="metric-sub">Kes Berdaftar</div>
+                    <div class="metric-value"><span id="totalCases">0</span> <span class="metric-unit">kes</span></div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">🦠</div>
+                    <div class="metric-title">Diagnosis Tertinggi</div>
+                    <div class="metric-sub">Paling banyak direkodkan</div>
+                    <div class="metric-value" style="font-size:23px;" id="topDiagnosis">-</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">📍</div>
+                    <div class="metric-title">Lokasi Terjejas</div>
+                    <div class="metric-sub">Bilangan kawasan</div>
+                    <div class="metric-value"><span id="affectedLocations">0</span></div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">🚨</div>
+                    <div class="metric-title">Kes Kritikal</div>
+                    <div class="metric-sub">Status Kritikal</div>
+                    <div class="metric-value"><span id="criticalCases">0</span></div>
+                </div>
+            </div>
+
+            <div class="card map-activity-card">
+                <div class="recent-box">
+                    <h2 class="section-title">Recent Cases</h2>
+                    <div class="recent-list" id="recentList"></div>
+                </div>
+
+                <div>
+                    <div id="map"></div>
+                </div>
+            </div>
+
+            <div class="card" style="padding:24px;">
+                <div class="chart-head">
+                    <h2 class="section-title" style="margin:0;">Diagnosis Breakdown</h2>
+                    <span style="color:#888;font-size:14px;">Click chart to filter</span>
+                </div>
+                <div class="chart-container" style="height:260px;">
+                    <canvas id="diagnosisChart"></canvas>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- RIGHT PANEL -->
+        <aside class="right-panel">
+
+            <div class="card stat-card">
+                <div class="chart-head">
+                    <h2 class="section-title" style="margin:0;">Statistic</h2>
+                    <div class="chart-legend">
+                        <span><i class="tiny-dot" style="background:var(--green);"></i>Kes</span>
+                        <span><i class="tiny-dot" style="background:#9cc2ff;"></i>Kritikal</span>
+                        <button class="week-pill">Weekly</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="progress-wrap">
+                <div class="card progress-card">
+                    <h2 class="section-title">Recovery Progress</h2>
+                    <div class="progress-circle" id="recoveryRing">
+                        <span id="recoveryPercent">0%</span>
+                    </div>
+                    <p class="progress-note">Peratus kes berstatus Pulih daripada data yang ditapis.</p>
+                </div>
+
+                <div class="card filter-card">
+                    <h2 class="section-title">Filter</h2>
+                    <div class="filter-mini">
+                        <label style="font-weight:800;">Minggu Epid</label>
+                        <input type="range" id="weekSlider" min="0" max="52" value="0" class="slider">
+                        <span class="filter-value" id="filterValue">Semua</span>
+                        <button class="clear-btn" id="clearBtn">Clear Filter</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="padding:24px;">
+                <h2 class="section-title">Gender & Age</h2>
+                <div class="chart-container" style="height:250px;">
+                    <canvas id="genderAgeChart"></canvas>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- TABLE -->
+        <section class="card table-section">
+            <div class="table-top">
+                <h2 class="section-title" style="margin:0;">List Alerts</h2>
+
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                    <div class="search-box">
+                        🔎
+                        <input id="searchInput" placeholder="Search diagnosis, status, lokasi..." />
+                    </div>
+                    <button class="clear-btn" id="clearBtn2">Clear Filter</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>ID Kes</th>
+                            <th>Epid Week</th>
+                            <th>Diagnosis</th>
+                            <th>Jantina</th>
+                            <th>Umur</th>
+                            <th>Lokasi</th>
+                            <th>Status</th>
+                            <th>Severity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </section>
+
+    </div>
+</div>
+
+<script>
+    // =========================
+    // DATA - Same concept as previous code
+    // =========================
+    function generateData() {
+        const diseases = ['Demam Berdarah', 'Influenza', 'COVID-19', 'Malaria', 'Typhoid'];
+        const locations = ['Kuala Lumpur', 'Shah Alam', 'Petaling Jaya', 'Klang', 'Subang', 'Ampang', 'Selayang'];
+        const genders = ['Lelaki', 'Perempuan'];
+        const statuses = ['Aktif', 'Pulih', 'Pemantauan', 'Kritikal'];
+
+        const data = [];
+
+        for (let i = 0; i < 250; i++) {
+            const umur = Math.floor(Math.random() * 80) + 5;
+
+            let umurKumpulan;
+            if (umur <= 14) umurKumpulan = '14 dan ke bawah';
+            else if (umur <= 50) umurKumpulan = '15 - 50';
+            else umurKumpulan = '51 dan ke atas';
+
+            const diagnosis = diseases[Math.floor(Math.random() * diseases.length)];
+            const status = statuses[Math.floor(Math.random() * statuses.length)];
+
+            data.push({
+                Case_ID: 'CASE-' + String(i + 1).padStart(5, '0'),
+                Diagnosis: diagnosis,
+                Jantina: genders[Math.floor(Math.random() * genders.length)],
+                Umur: umur,
+                Lokasi: locations[Math.floor(Math.random() * locations.length)],
+                'Minggu Epid': Math.floor(Math.random() * 52) + 1,
+                Status: status,
+                Severity: calculateSeverity(diagnosis, status, umur),
+                Latitud: (Math.random() * 0.4 + 2.9).toFixed(4),
+                Longitud: (Math.random() * 0.7 + 101.3).toFixed(4),
+                Umur_Kumpulan: umurKumpulan
             });
-            
-            currentPage = 1;
-            updateKPIs();
-            updateDiagnosisChart();
-            updateGenderChart();
-            updateAgeChart();
-            updateMap();
-            updateRecent();
-            updateTable();
-            updateClearButton();
         }
-        
-        function clearAllFilters() {
-            activeFilters = {};
-            filteredData = [...allData];
-            document.getElementById('weekSlider').value = 0;
-            document.getElementById('filterValue').textContent = 'Semua';
-            updateKPIs();
-            updateDiagnosisChart();
-            updateGenderChart();
-            updateAgeChart();
-            updateMap();
-            updateRecent();
-            updateTable();
-            updateClearButton();
-        }
-        
-        function updateClearButton() {
-            const btn1 = document.getElementById('clearBtn');
-            const btn2 = document.getElementById('clearBtn2');
-            if (Object.keys(activeFilters).length > 0) {
-                btn1.classList.add('show');
-                btn2.classList.add('show');
-            } else {
-                btn1.classList.remove('show');
-                btn2.classList.remove('show');
-            }
-        }
-        
-        // ===== EVENT LISTENERS =====
-        document.getElementById('weekSlider').addEventListener('input', (e) => {
-            const week = parseInt(e.target.value);
-            document.getElementById('filterValue').textContent = week === 0 ? 'Semua' : `ME ${week}`;
-            if (week > 0) {
-                filterByWeek(week);
-            } else {
-                activeFilters.week = null;
-                applyFilters();
+
+        return data;
+    }
+
+    function calculateSeverity(diagnosis, status, age) {
+        const base = {
+            'Demam Berdarah': 7,
+            'COVID-19': 7,
+            'Malaria': 6,
+            'Typhoid': 5,
+            'Influenza': 3
+        };
+
+        const mult = {
+            'Kritikal': 1.5,
+            'Aktif': 1.2,
+            'Pemantauan': 1.0,
+            'Pulih': 0.55
+        };
+
+        let severity = (base[diagnosis] || 5) * (mult[status] || 1);
+
+        if (age < 14) severity += 1;
+        if (age > 60) severity += 1.5;
+
+        return Math.min(Math.max(Math.round(severity), 1), 10);
+    }
+
+    const rawData = generateData();
+    let allData = [...rawData];
+    let filteredData = [...rawData];
+    let activeFilters = {};
+    let charts = {};
+    let map = null;
+    let markers = [];
+    let currentPage = 1;
+    const rowsPerPage = 10;
+
+    const chartColors = {
+        'Demam Berdarah': '#ef4444',
+        'Influenza': '#f59e0b',
+        'COVID-19': '#3b82f6',
+        'Malaria': '#ec4899',
+        'Typhoid': '#8b5cf6'
+    };
+
+    // =========================
+    // HELPERS
+    // =========================
+    function countBy(arr, key) {
+        const obj = {};
+        arr.forEach(item => {
+            const val = item[key];
+            obj[val] = (obj[val] || 0) + 1;
+        });
+        return obj;
+    }
+
+    function getTopDiagnosis() {
+        const counts = countBy(filteredData, 'Diagnosis');
+        return Object.keys(counts).sort((a,b) => counts[b] - counts[a])[0] || '-';
+    }
+
+    function updateKPIs() {
+        document.getElementById('totalCases').textContent = filteredData.length;
+        document.getElementById('topDiagnosis').textContent = getTopDiagnosis();
+        document.getElementById('affectedLocations').textContent = new Set(filteredData.map(d => d.Lokasi)).size;
+        document.getElementById('criticalCases').textContent = filteredData.filter(d => d.Status === 'Kritikal').length;
+
+        document.getElementById('bodyTopDiagnosis').textContent = getTopDiagnosis();
+        document.getElementById('bodyCaseCount').textContent = filteredData.length;
+
+        updateRecoveryRing();
+        updateTimeline();
+        updateHotspots();
+    }
+
+    function updateRecoveryRing() {
+        const total = filteredData.length || 1;
+        const pulih = filteredData.filter(d => d.Status === 'Pulih').length;
+        const pct = Math.round((pulih / total) * 100);
+        document.getElementById('recoveryPercent').textContent = pct + '%';
+        document.getElementById('recoveryRing').style.background =
+            `conic-gradient(var(--green) 0deg, var(--green) ${pct * 3.6}deg, #edf0f2 ${pct * 3.6}deg)`;
+    }
+
+    function updateTimeline() {
+        const timeline = document.getElementById('weekTimeline');
+        const selectedWeek = activeFilters.week || null;
+        const weeks = [52, 40, 30, 20, 10, 1];
+
+        timeline.innerHTML = weeks.map(w => `
+            <div class="timeline-item ${selectedWeek === w ? 'active' : ''}" onclick="filterByWeek(${w})">
+                <span class="timeline-bullet"></span>
+                <span>ME ${w}</span>
+            </div>
+        `).join('');
+    }
+
+    function updateHotspots() {
+        const counts = countBy(filteredData, 'Diagnosis');
+        const top = Object.keys(counts).sort((a,b) => counts[b] - counts[a]).slice(0,5);
+        const hotspots = document.querySelectorAll('.hotspot');
+
+        hotspots.forEach((h, i) => {
+            const diagnosis = top[i] || '-';
+            h.dataset.diagnosis = diagnosis;
+            h.querySelector('.tip').textContent = diagnosis + (counts[diagnosis] ? `: ${counts[diagnosis]} kes` : '');
+            h.onclick = () => {
+                if (diagnosis !== '-') filterByDiagnosis(diagnosis);
+            };
+        });
+    }
+
+    // =========================
+    // CHARTS
+    // =========================
+    function updateCharts() {
+        updateDiagnosisChart();
+        updateWeeklyChart();
+        updateGenderAgeChart();
+    }
+
+    function updateDiagnosisChart() {
+        const counts = countBy(filteredData, 'Diagnosis');
+        const labels = Object.keys(counts);
+        const values = Object.values(counts);
+
+        if (charts.diagnosis) charts.diagnosis.destroy();
+
+        charts.diagnosis = new Chart(document.getElementById('diagnosisChart'), {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: labels.map(l => chartColors[l] || '#999'),
+                    borderWidth: 5,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            font: { family: 'Inter', size: 13 }
+                        }
+                    },
+                    datalabels: {
+                        color: '#111',
+                        font: { weight: '800' },
+                        formatter: value => value
+                    }
+                },
+                onClick: (evt, elements) => {
+                    if (elements.length) {
+                        const diagnosis = labels[elements[0].index];
+                        filterByDiagnosis(diagnosis);
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+
+    function updateWeeklyChart() {
+        const weeks = Array.from({ length: 52 }, (_, i) => i + 1);
+
+        const cases = weeks.map(w => filteredData.filter(d => d['Minggu Epid'] === w).length);
+        const critical = weeks.map(w => filteredData.filter(d => d['Minggu Epid'] === w && d.Status === 'Kritikal').length);
+
+        if (charts.weekly) charts.weekly.destroy();
+
+        charts.weekly = new Chart(document.getElementById('weeklyChart'), {
+            type: 'line',
+            data: {
+                labels: weeks.map(w => 'ME ' + w),
+                datasets: [
+                    {
+                        label: 'Kes',
+                        data: cases,
+                        borderColor: '#38a832',
+                        backgroundColor: 'rgba(56,168,50,0.08)',
+                        tension: 0.45,
+                        fill: true,
+                        pointRadius: 0,
+                        borderWidth: 3
+                    },
+                    {
+                        label: 'Kritikal',
+                        data: critical,
+                        borderColor: '#9cc2ff',
+                        backgroundColor: 'rgba(156,194,255,0.12)',
+                        tension: 0.45,
+                        fill: true,
+                        pointRadius: 0,
+                        borderWidth: 3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { maxTicksLimit: 7, color: '#888' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f0f0f0' },
+                        ticks: { color: '#888' }
+                    }
+                }
             }
         });
-        
+    }
+
+    function updateGenderAgeChart() {
+        const genderCounts = countBy(filteredData, 'Jantina');
+        const ageCounts = countBy(filteredData, 'Umur_Kumpulan');
+
+        if (charts.genderAge) charts.genderAge.destroy();
+
+        charts.genderAge = new Chart(document.getElementById('genderAgeChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Lelaki', 'Perempuan', '≤14', '15-50', '≥51'],
+                datasets: [{
+                    label: 'Bilangan',
+                    data: [
+                        genderCounts['Lelaki'] || 0,
+                        genderCounts['Perempuan'] || 0,
+                        ageCounts['14 dan ke bawah'] || 0,
+                        ageCounts['15 - 50'] || 0,
+                        ageCounts['51 dan ke atas'] || 0
+                    ],
+                    backgroundColor: ['#3b82f6', '#ec4899', '#38a832', '#f59e0b', '#8b5cf6'],
+                    borderRadius: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        color: '#111',
+                        anchor: 'end',
+                        align: 'top',
+                        font: { weight: '800' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, grid: { color: '#f2f2f2' } }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+
+    // =========================
+    // MAP
+    // =========================
+    function updateMap() {
+        if (!map) return;
+
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+
+        const locCounts = {};
+
+        filteredData.forEach(d => {
+            const key = `${d.Latitud},${d.Longitud}`;
+            if (!locCounts[key]) {
+                locCounts[key] = {
+                    count: 0,
+                    lat: parseFloat(d.Latitud),
+                    lng: parseFloat(d.Longitud),
+                    diagnosis: d.Diagnosis
+                };
+            }
+            locCounts[key].count++;
+        });
+
+        Object.values(locCounts).forEach(loc => {
+            const color = chartColors[loc.diagnosis] || '#38a832';
+
+            const circle = L.circleMarker([loc.lat, loc.lng], {
+                radius: Math.sqrt(loc.count) * 5 + 7,
+                fillColor: color,
+                color: '#ffffff',
+                weight: 3,
+                opacity: 1,
+                fillOpacity: 0.82
+            });
+
+            circle.bindPopup(`<strong>${loc.diagnosis}</strong><br>Kes: ${loc.count}`);
+            circle.on('click', () => filterByLocation(loc.lat, loc.lng));
+            circle.addTo(map);
+            markers.push(circle);
+        });
+    }
+
+    // =========================
+    // RECENT + TABLE
+    // =========================
+    function updateRecent() {
+        const recent = filteredData.slice(-4).reverse();
+
+        document.getElementById('recentList').innerHTML = recent.map(r => `
+            <div class="recent-item">
+                <div class="recent-top">
+                    <div class="case-avatar">${r.Case_ID.slice(-2)}</div>
+                    <div>
+                        <div class="case-id">${r.Case_ID}</div>
+                        <div class="recent-meta">ME ${r['Minggu Epid']} • ${r.Lokasi}</div>
+                    </div>
+                </div>
+                <div class="recent-diagnosis">${r.Diagnosis}</div>
+            </div>
+        `).join('') || '<p style="color:#999;">Tiada rekod.</p>';
+    }
+
+    function updateTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+        let tableData = filteredData;
+
+        if (search) {
+            tableData = tableData.filter(r =>
+                r.Diagnosis.toLowerCase().includes(search) ||
+                r.Status.toLowerCase().includes(search) ||
+                r.Lokasi.toLowerCase().includes(search) ||
+                r.Jantina.toLowerCase().includes(search) ||
+                r.Case_ID.toLowerCase().includes(search)
+            );
+        }
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const pageData = tableData.slice(start, end);
+
+        document.getElementById('tableBody').innerHTML = pageData.map((r, i) => {
+            let sevClass = 'sev-low';
+            if (r.Severity >= 7) sevClass = 'sev-high';
+            else if (r.Severity >= 4) sevClass = 'sev-med';
+
+            return `
+                <tr>
+                    <td>${start + i + 1}</td>
+                    <td><strong>${r.Case_ID}</strong></td>
+                    <td>ME ${r['Minggu Epid']}</td>
+                    <td><strong>${r.Diagnosis}</strong></td>
+                    <td>${r.Jantina}</td>
+                    <td>${r.Umur} tahun</td>
+                    <td>${r.Lokasi}</td>
+                    <td><span class="status-pill status-${r.Status}">${r.Status}</span></td>
+                    <td><span class="sev ${sevClass}">${r.Severity}/10</span></td>
+                </tr>
+            `;
+        }).join('');
+
+        const pages = Math.ceil(tableData.length / rowsPerPage) || 1;
+
+        document.getElementById('pagination').innerHTML = Array.from({ length: pages }, (_, i) => i + 1)
+            .map(p => `<button class="${p === currentPage ? 'active' : ''}" onclick="currentPage=${p}; updateTable();">${p}</button>`)
+            .join('');
+    }
+
+    // =========================
+    // FILTERS
+    // =========================
+    function filterByDiagnosis(diagnosis) {
+        activeFilters.diagnosis = diagnosis;
+        applyFilters();
+    }
+
+    function filterByWeek(week) {
+        activeFilters.week = parseInt(week);
+        document.getElementById('weekSlider').value = week;
+        document.getElementById('filterValue').textContent = week === 0 ? 'Semua' : 'ME ' + week;
+        applyFilters();
+    }
+
+    function filterByLocation(lat, lng) {
+        activeFilters.location = { lat, lng };
+        applyFilters();
+    }
+
+    function applyFilters() {
+        filteredData = allData.filter(record => {
+            if (activeFilters.diagnosis && record.Diagnosis !== activeFilters.diagnosis) return false;
+            if (activeFilters.week && record['Minggu Epid'] !== activeFilters.week) return false;
+
+            if (activeFilters.location) {
+                const threshold = 0.01;
+                const match =
+                    Math.abs(parseFloat(record.Latitud) - activeFilters.location.lat) < threshold &&
+                    Math.abs(parseFloat(record.Longitud) - activeFilters.location.lng) < threshold;
+
+                if (!match) return false;
+            }
+
+            return true;
+        });
+
+        currentPage = 1;
+        refreshDashboard();
+        updateClearButton();
+    }
+
+    function clearAllFilters() {
+        activeFilters = {};
+        filteredData = [...allData];
+        currentPage = 1;
+
+        document.getElementById('weekSlider').value = 0;
+        document.getElementById('filterValue').textContent = 'Semua';
+        document.getElementById('searchInput').value = '';
+
+        refreshDashboard();
+        updateClearButton();
+    }
+
+    function updateClearButton() {
+        const hasFilters = Object.keys(activeFilters).length > 0;
+
+        document.getElementById('clearBtn').classList.toggle('show', hasFilters);
+        document.getElementById('clearBtn2').classList.toggle('show', hasFilters);
+    }
+
+    function refreshDashboard() {
+        updateKPIs();
+        updateCharts();
+        updateMap();
+        updateRecent();
+        updateTable();
+    }
+
+    // =========================
+    // INIT
+    // =========================
+    window.addEventListener('load', () => {
+        map = L.map('map', {
+            zoomControl: false
+        }).setView([3.1357, 101.6869], 10);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+
+        setTimeout(() => {
+            map.invalidateSize();
+            refreshDashboard();
+        }, 300);
+
+        document.getElementById('weekSlider').addEventListener('input', e => {
+            const week = parseInt(e.target.value);
+            document.getElementById('filterValue').textContent = week === 0 ? 'Semua' : 'ME ' + week;
+
+            if (week === 0) delete activeFilters.week;
+            else activeFilters.week = week;
+
+            applyFilters();
+        });
+
         document.getElementById('clearBtn').addEventListener('click', clearAllFilters);
         document.getElementById('clearBtn2').addEventListener('click', clearAllFilters);
-        
-        // ===== INITIALIZATION =====
-        function initializeDashboard() {
-            if (!map) {
-                map = L.map('map').setView([3.1357, 101.6869], 11);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(map);
-            }
-            
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('ms-MY');
-            updateKPIs();
-            updateDiagnosisChart();
-            updateGenderChart();
-            updateAgeChart();
-            updateMap();
-            updateRecent();
+
+        document.getElementById('searchInput').addEventListener('input', () => {
+            currentPage = 1;
             updateTable();
-            updateClearButton();
-        }
-        
-        window.addEventListener('load', () => {
-            setTimeout(initializeDashboard, 300);
         });
-    </script>
+    });
+</script>
 </body>
 </html>
