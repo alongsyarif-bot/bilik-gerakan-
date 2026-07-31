@@ -104,6 +104,7 @@
             display: grid;
             place-items: center;
             font-size: 20px;
+            cursor: pointer;
         }
 
         /* NAV */
@@ -155,9 +156,22 @@
             white-space: nowrap;
         }
 
+        .nav-links span {
+            cursor: pointer;
+            padding: 10px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links span:hover {
+            background: var(--green-soft);
+            color: var(--green-dark);
+        }
+
         .nav-links span.active {
             color: #111;
             font-weight: 800;
+            background: var(--green-soft);
         }
 
         /* MAIN LAYOUT */
@@ -223,6 +237,12 @@
             gap: 14px;
             z-index: 2;
             font-size: 17px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .timeline-item:hover {
+            color: var(--green-dark);
         }
 
         .timeline-bullet {
@@ -230,6 +250,7 @@
             height: 13px;
             background: #aaa;
             border-radius: 50%;
+            transition: all 0.25s ease;
         }
 
         .timeline-item.active {
@@ -239,6 +260,8 @@
 
         .timeline-item.active .timeline-bullet {
             background: #111;
+            width: 16px;
+            height: 16px;
         }
 
         .body-area {
@@ -254,46 +277,6 @@
             max-width: 80%;
             filter: drop-shadow(0 18px 25px rgba(0,0,0,0.08));
         }
-
-        .hotspot {
-            position: absolute;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--green);
-            border: 6px solid white;
-            box-shadow: 0 8px 22px rgba(56,168,50,0.35);
-            cursor: pointer;
-            transition: 0.25s ease;
-            z-index: 4;
-        }
-
-        .hotspot:hover {
-            transform: scale(1.18);
-        }
-
-        .hotspot .tip {
-            display: none;
-            position: absolute;
-            left: 34px;
-            top: -6px;
-            white-space: nowrap;
-            background: #111;
-            color: #fff;
-            font-size: 12px;
-            padding: 6px 10px;
-            border-radius: 8px;
-        }
-
-        .hotspot:hover .tip {
-            display: block;
-        }
-
-        .h1 { top: 90px; right: 112px; }
-        .h2 { top: 205px; left: 120px; }
-        .h3 { top: 185px; right: 92px; }
-        .h4 { top: 310px; right: 76px; }
-        .h5 { top: 382px; left: 92px; }
 
         .complaint-card {
             position: absolute;
@@ -341,15 +324,6 @@
             padding-top: 20px;
             font-size: 14px;
             color: #777;
-        }
-
-        .legend-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: var(--green);
-            border-radius: 50%;
-            margin-right: 7px;
         }
 
         /* CENTER */
@@ -436,6 +410,8 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .recent-item {
@@ -468,6 +444,7 @@
             place-items: center;
             color: var(--green-dark);
             font-weight: 800;
+            font-size: 13px;
         }
 
         .case-id {
@@ -484,6 +461,7 @@
             font-weight: 700;
             font-size: 14px;
             margin-top: 5px;
+            color: var(--green-dark);
         }
 
         #map {
@@ -538,6 +516,11 @@
             border-radius: 8px;
             font-weight: 700;
             cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .week-pill:hover {
+            background: var(--green-soft);
         }
 
         .chart-container {
@@ -736,6 +719,11 @@
             border-radius: 10px;
             cursor: pointer;
             font-weight: 800;
+            transition: 0.25s;
+        }
+
+        .pagination button:hover {
+            background: var(--green-soft);
         }
 
         .pagination button.active {
@@ -754,10 +742,6 @@
                 grid-column: 1 / -1;
                 display: grid;
                 grid-template-columns: 1.4fr 1fr;
-            }
-
-            .diagnosis-panel {
-                min-height: auto;
             }
         }
 
@@ -810,10 +794,6 @@
             .human-figure {
                 width: 220px;
             }
-
-            .hotspot {
-                display: none;
-            }
         }
     </style>
 </head>
@@ -830,9 +810,9 @@
         </div>
 
         <div class="top-actions">
-            <span>🔔</span>
-            <span>⚙️</span>
-            <div class="avatar">👨‍⚕️</div>
+            <span style="cursor:pointer;" title="Notifications">🔔</span>
+            <span style="cursor:pointer;" title="Settings">⚙️</span>
+            <div class="avatar" title="Profile">👨‍⚕️</div>
             <strong style="font-size:18px;color:#777;">Bilik Gerakan</strong>
         </div>
     </div>
@@ -845,11 +825,11 @@
         </div>
 
         <div class="nav-links">
-            <span class="active">Overview</span>
-            <span>Kes Harian</span>
-            <span>Laporan Epid</span>
-            <span>Diagnosis</span>
-            <span>Lokasi</span>
+            <span class="active" onclick="setActive(this, 'Overview')">Overview</span>
+            <span onclick="setActive(this, 'Kesiarian')">Kesiarian</span>
+            <span onclick="setActive(this, 'Laporan')">Laporan Epid</span>
+            <span onclick="setActive(this, 'Diagnosis')">Diagnosis</span>
+            <span onclick="setActive(this, 'Lokasi')">Lokasi</span>
         </div>
     </div>
 
@@ -860,10 +840,10 @@
             <h2 class="section-title">Diagnosis History</h2>
 
             <div class="diagnosis-layout">
-                <div class="timeline" id="weekTimeline"></div>
+                <div class="timeline" id="yearTimeline"></div>
 
                 <div class="body-area">
-                    <!-- Simple original SVG body illustration -->
+                    <!-- Body without green dots -->
                     <svg class="human-figure" viewBox="0 0 260 620" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
@@ -871,24 +851,25 @@
                                 <stop offset="100%" stop-color="#ffe0c7"/>
                             </linearGradient>
                         </defs>
-                        <ellipse cx="130" cy="596" rx="78" ry="17" fill="none" stroke="#cfcfcf" stroke-width="2"/>
+                        <!-- Head -->
                         <circle cx="130" cy="62" r="40" fill="url(#bodyGrad)" stroke="#ff8a7a" stroke-width="5"/>
-                        <path d="M95 115 C80 155 73 220 76 310 C78 390 82 470 95 565" fill="none" stroke="#ff8a7a" stroke-width="30" stroke-linecap="round"/>
-                        <path d="M165 115 C180 155 187 220 184 310 C182 390 178 470 165 565" fill="none" stroke="#ff8a7a" stroke-width="30" stroke-linecap="round"/>
+                        <!-- Body -->
+                        <path d="M100 128 C120 105 140 105 165 128 C185 180 185 250 165 322 C145 345 115 345 95 322 C75 250 75 180 95 128Z" fill="#fff3ed" stroke="#ff8a7a" stroke-width="6"/>
+                        <!-- Left Arm -->
                         <path d="M100 120 C78 165 65 250 50 350" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
+                        <!-- Right Arm -->
                         <path d="M160 120 C182 165 195 250 210 350" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
-                        <path d="M95 128 C120 105 140 105 165 128 C185 180 185 250 165 322 C145 345 115 345 95 322 C75 250 75 180 95 128Z" fill="#fff3ed" stroke="#ff8a7a" stroke-width="6"/>
+                        <!-- Left Leg -->
                         <path d="M105 330 C112 410 112 505 103 570" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
+                        <!-- Right Leg -->
                         <path d="M155 330 C148 410 148 505 157 570" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
+                        <!-- Spine -->
                         <path d="M120 120 L120 325" stroke="#ff6b60" stroke-width="4" opacity="0.6"/>
                         <path d="M140 120 L140 325" stroke="#ff6b60" stroke-width="4" opacity="0.6"/>
+                        <!-- Feet -->
+                        <ellipse cx="103" cy="596" rx="18" ry="15" fill="#ff8a7a" opacity="0.6"/>
+                        <ellipse cx="157" cy="596" rx="18" ry="15" fill="#ff8a7a" opacity="0.6"/>
                     </svg>
-
-                    <div class="hotspot h1"><span class="tip"></span></div>
-                    <div class="hotspot h2"><span class="tip"></span></div>
-                    <div class="hotspot h3"><span class="tip"></span></div>
-                    <div class="hotspot h4"><span class="tip"></span></div>
-                    <div class="hotspot h5"><span class="tip"></span></div>
 
                     <div class="complaint-card">
                         <p><strong>Top Diagnosis:</strong> <span id="bodyTopDiagnosis">-</span></p>
@@ -899,9 +880,9 @@
             </div>
 
             <div class="system-legend">
-                <span><span class="legend-dot"></span>Diagnosis</span>
-                <span><span class="legend-dot"></span>Status</span>
-                <span><span class="legend-dot"></span>Lokasi</span>
+                <span>📋 Diagnosis by Year</span>
+                <span>📊 Status: Active / Recovery</span>
+                <span>📍 Location Based</span>
             </div>
         </section>
 
@@ -1048,7 +1029,7 @@
 
 <script>
     // =========================
-    // DATA - Same concept as previous code
+    // DATA
     // =========================
     function generateData() {
         const diseases = ['Demam Berdarah', 'Influenza', 'COVID-19', 'Malaria', 'Typhoid'];
@@ -1120,6 +1101,7 @@
     let markers = [];
     let currentPage = 1;
     const rowsPerPage = 10;
+    let currentSection = 'Overview';
 
     const chartColors = {
         'Demam Berdarah': '#ef4444',
@@ -1128,6 +1110,16 @@
         'Malaria': '#ec4899',
         'Typhoid': '#8b5cf6'
     };
+
+    // =========================
+    // NAV FUNCTIONALITY
+    // =========================
+    function setActive(element, section) {
+        document.querySelectorAll('.nav-links span').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+        currentSection = section;
+        console.log('Navigated to:', section);
+    }
 
     // =========================
     // HELPERS
@@ -1156,8 +1148,7 @@
         document.getElementById('bodyCaseCount').textContent = filteredData.length;
 
         updateRecoveryRing();
-        updateTimeline();
-        updateHotspots();
+        updateYearTimeline();
     }
 
     function updateRecoveryRing() {
@@ -1169,32 +1160,18 @@
             `conic-gradient(var(--green) 0deg, var(--green) ${pct * 3.6}deg, #edf0f2 ${pct * 3.6}deg)`;
     }
 
-    function updateTimeline() {
-        const timeline = document.getElementById('weekTimeline');
-        const selectedWeek = activeFilters.week || null;
-        const weeks = [52, 40, 30, 20, 10, 1];
+    function updateYearTimeline() {
+        const timeline = document.getElementById('yearTimeline');
+        const currentYear = new Date().getFullYear();
+        const years = [currentYear, currentYear - 1, currentYear - 2, currentYear - 3, currentYear - 4];
+        const selectedYear = activeFilters.year || null;
 
-        timeline.innerHTML = weeks.map(w => `
-            <div class="timeline-item ${selectedWeek === w ? 'active' : ''}" onclick="filterByWeek(${w})">
+        timeline.innerHTML = years.map(y => `
+            <div class="timeline-item ${selectedYear === y ? 'active' : ''}" onclick="filterByYear(${y})">
                 <span class="timeline-bullet"></span>
-                <span>ME ${w}</span>
+                <span>${y}</span>
             </div>
         `).join('');
-    }
-
-    function updateHotspots() {
-        const counts = countBy(filteredData, 'Diagnosis');
-        const top = Object.keys(counts).sort((a,b) => counts[b] - counts[a]).slice(0,5);
-        const hotspots = document.querySelectorAll('.hotspot');
-
-        hotspots.forEach((h, i) => {
-            const diagnosis = top[i] || '-';
-            h.dataset.diagnosis = diagnosis;
-            h.querySelector('.tip').textContent = diagnosis + (counts[diagnosis] ? `: ${counts[diagnosis]} kes` : '');
-            h.onclick = () => {
-                if (diagnosis !== '-') filterByDiagnosis(diagnosis);
-            };
-        });
     }
 
     // =========================
@@ -1256,7 +1233,6 @@
 
     function updateWeeklyChart() {
         const weeks = Array.from({ length: 52 }, (_, i) => i + 1);
-
         const cases = weeks.map(w => filteredData.filter(d => d['Minggu Epid'] === w).length);
         const critical = weeks.map(w => filteredData.filter(d => d['Minggu Epid'] === w && d.Status === 'Kritikal').length);
 
@@ -1469,6 +1445,11 @@
     // =========================
     function filterByDiagnosis(diagnosis) {
         activeFilters.diagnosis = diagnosis;
+        applyFilters();
+    }
+
+    function filterByYear(year) {
+        activeFilters.year = year;
         applyFilters();
     }
 
