@@ -1,1575 +1,748 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>BILIK GERAKAN - Health Dashboard</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
-    <style>
-        :root {
-            --green: #38a832;
-            --green-dark: #228b22;
-            --green-soft: #eaf8e9;
-            --blue: #3b82f6;
-            --red: #ef4444;
-            --orange: #f59e0b;
-            --purple: #8b5cf6;
-            --text: #111827;
-            --muted: #8b8b8b;
-            --line: #ececec;
-            --bg: #f7f8f6;
-            --card: #ffffff;
-            --shadow: 0 18px 45px rgba(0,0,0,0.08);
-            --shadow-soft: 0 10px 30px rgba(0,0,0,0.055);
-            --radius-lg: 30px;
-            --radius-md: 22px;
-            --radius-sm: 16px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: "Inter", sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(56,168,50,0.10), transparent 35%),
-                linear-gradient(135deg, #f5f7f3 0%, #ffffff 50%, #f2f7f0 100%);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 22px;
-        }
-
-        .app-shell {
-            max-width: 1800px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.92);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 34px;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-
-        /* TOP WINDOW BAR */
-        .window-bar {
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 30px;
-            border-bottom: 1px solid var(--line);
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(10px);
-        }
-
-        .traffic {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .dot {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-        }
-
-        .dot.red { background: #ff4b4b; }
-        .dot.yellow { background: #ffd400; }
-        .dot.green { background: #31d843; }
-
-        .top-actions {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            color: #888;
-            font-size: 20px;
-        }
-
-        .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #d1fadf, #fff);
-            border: 2px solid white;
-            box-shadow: var(--shadow-soft);
-            display: grid;
-            place-items: center;
-            font-size: 20px;
-        }
-
-        /* NAV */
-        .nav {
-            min-height: 92px;
-            display: flex;
-            align-items: center;
-            padding: 0 34px;
-            gap: 48px;
-            border-bottom: 1px solid var(--line);
-            background: #fff;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            min-width: 260px;
-        }
-
-        .brand-logo {
-            width: 54px;
-            height: 38px;
-            border-radius: 50px;
-            background: linear-gradient(135deg, #b8f5b3, var(--green));
-            display: grid;
-            place-items: center;
-            color: white;
-            font-size: 28px;
-            font-weight: 900;
-            box-shadow: 0 10px 25px rgba(56,168,50,0.25);
-        }
-
-        .brand h1 {
-            font-size: 26px;
-            color: var(--green-dark);
-            letter-spacing: -0.04em;
-        }
-
-        .nav-links {
-            flex: 1;
-            display: flex;
-            gap: 44px;
-            align-items: center;
-            color: #8d8d8d;
-            font-size: 21px;
-            font-weight: 500;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-        .nav-links span.active {
-            color: #111;
-            font-weight: 800;
-        }
-
-        /* MAIN LAYOUT */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1.05fr 1.1fr 1fr;
-            gap: 24px;
-            padding: 28px;
-        }
-
-        .card {
-            background: var(--card);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(0,0,0,0.035);
-        }
-
-        .section-title {
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            margin-bottom: 20px;
-        }
-
-        /* LEFT DIAGNOSIS HISTORY */
-        .diagnosis-panel {
-            padding: 28px;
-            min-height: 750px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .diagnosis-layout {
-            display: grid;
-            grid-template-columns: 95px 1fr;
-            gap: 16px;
-            min-height: 620px;
-        }
-
-        .timeline {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            padding-top: 30px;
-            gap: 22px;
-            color: #8f8f8f;
-            position: relative;
-        }
-
-        .timeline::before {
-            content: "";
-            position: absolute;
-            left: 13px;
-            top: 42px;
-            bottom: 30px;
-            width: 2px;
-            border-left: 2px dashed #bcbcbc;
-        }
-
-        .timeline-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            z-index: 2;
-            font-size: 17px;
-        }
-
-        .timeline-bullet {
-            width: 13px;
-            height: 13px;
-            background: #aaa;
-            border-radius: 50%;
-        }
-
-        .timeline-item.active {
-            color: #111;
-            font-weight: 700;
-        }
-
-        .timeline-item.active .timeline-bullet {
-            background: #111;
-        }
-
-        .body-area {
-            position: relative;
-            min-height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .human-figure {
-            width: 260px;
-            max-width: 80%;
-            filter: drop-shadow(0 18px 25px rgba(0,0,0,0.08));
-        }
-
-        .hotspot {
-            position: absolute;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--green);
-            border: 6px solid white;
-            box-shadow: 0 8px 22px rgba(56,168,50,0.35);
-            cursor: pointer;
-            transition: 0.25s ease;
-            z-index: 4;
-        }
-
-        .hotspot:hover {
-            transform: scale(1.18);
-        }
-
-        .hotspot .tip {
-            display: none;
-            position: absolute;
-            left: 34px;
-            top: -6px;
-            white-space: nowrap;
-            background: #111;
-            color: #fff;
-            font-size: 12px;
-            padding: 6px 10px;
-            border-radius: 8px;
-        }
-
-        .hotspot:hover .tip {
-            display: block;
-        }
-
-        .h1 { top: 90px; right: 112px; }
-        .h2 { top: 205px; left: 120px; }
-        .h3 { top: 185px; right: 92px; }
-        .h4 { top: 310px; right: 76px; }
-        .h5 { top: 382px; left: 92px; }
-
-        .complaint-card {
-            position: absolute;
-            left: 130px;
-            right: 20px;
-            bottom: 105px;
-            background: rgba(255,255,255,0.96);
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-            padding: 18px;
-            z-index: 5;
-        }
-
-        .complaint-card p {
-            font-size: 15px;
-            margin-bottom: 10px;
-        }
-
-        .complaint-card .muted {
-            color: var(--muted);
-        }
-
-        .show-detail {
-            width: 100%;
-            border: none;
-            background: var(--green);
-            color: white;
-            border-radius: 9px;
-            height: 48px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: 0.25s;
-        }
-
-        .show-detail:hover {
-            background: var(--green-dark);
-            transform: translateY(-1px);
-        }
-
-        .system-legend {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 20px;
-            font-size: 14px;
-            color: #777;
-        }
-
-        .legend-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: var(--green);
-            border-radius: 50%;
-            margin-right: 7px;
-        }
-
-        /* CENTER */
-        .center-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .metric-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-        }
-
-        .metric-card {
-            min-height: 170px;
-            padding: 24px;
-            border-radius: 22px;
-            background: #fff;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(0,0,0,0.035);
-            transition: 0.25s ease;
-        }
-
-        .metric-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow);
-        }
-
-        .metric-card.primary {
-            background: var(--green);
-            color: white;
-            transform: rotate(-4deg);
-            box-shadow: 0 20px 35px rgba(56,168,50,0.25);
-        }
-
-        .metric-card.primary:hover {
-            transform: rotate(-2deg) translateY(-3px);
-        }
-
-        .metric-icon {
-            font-size: 32px;
-            margin-bottom: 18px;
-        }
-
-        .metric-title {
-            font-size: 18px;
-            font-weight: 750;
-            margin-bottom: 26px;
-        }
-
-        .metric-sub {
-            font-size: 14px;
-            opacity: 0.7;
-            margin-bottom: 4px;
-        }
-
-        .metric-value {
-            font-size: 30px;
-            font-weight: 850;
-            letter-spacing: -0.05em;
-        }
-
-        .metric-unit {
-            font-size: 16px;
-            font-weight: 500;
-            opacity: 0.7;
-        }
-
-        .map-activity-card {
-            padding: 22px;
-            display: grid;
-            grid-template-columns: 1fr 1.1fr;
-            gap: 18px;
-            align-items: stretch;
-        }
-
-        .recent-box {
-            padding: 8px;
-        }
-
-        .recent-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .recent-item {
-            padding: 12px;
-            border-radius: 16px;
-            background: #fbfbfb;
-            border: 1px solid #f0f0f0;
-            cursor: pointer;
-            transition: 0.25s;
-        }
-
-        .recent-item:hover {
-            background: var(--green-soft);
-            transform: translateX(4px);
-        }
-
-        .recent-top {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-
-        .case-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #d9ffd8, #fff);
-            display: grid;
-            place-items: center;
-            color: var(--green-dark);
-            font-weight: 800;
-        }
-
-        .case-id {
-            font-weight: 800;
-            font-size: 15px;
-        }
-
-        .recent-meta {
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .recent-diagnosis {
-            font-weight: 700;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        #map {
-            height: 270px;
-            border-radius: 22px;
-            overflow: hidden;
-            border: none;
-            z-index: 1;
-        }
-
-        /* RIGHT */
-        .right-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .stat-card {
-            padding: 26px;
-            min-height: 360px;
-        }
-
-        .chart-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            gap: 14px;
-        }
-
-        .chart-legend {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            color: #777;
-            font-size: 14px;
-            flex-wrap: wrap;
-        }
-
-        .tiny-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-        }
-
-        .week-pill {
-            border: 1px solid var(--line);
-            background: #fff;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .chart-container {
-            height: 285px;
-            position: relative;
-        }
-
-        .progress-wrap {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .progress-card, .filter-card {
-            padding: 24px;
-        }
-
-        .progress-circle {
-            width: 142px;
-            height: 142px;
-            margin: 15px auto;
-            border-radius: 50%;
-            background: conic-gradient(var(--green) 0deg, var(--green) 270deg, #edf0f2 270deg);
-            display: grid;
-            place-items: center;
-            position: relative;
-        }
-
-        .progress-circle::before {
-            content: "";
-            position: absolute;
-            width: 104px;
-            height: 104px;
-            background: white;
-            border-radius: 50%;
-        }
-
-        .progress-circle span {
-            position: relative;
-            font-size: 30px;
-            font-weight: 850;
-        }
-
-        .progress-note {
-            text-align: center;
-            color: #777;
-            font-size: 14px;
-            line-height: 1.35;
-        }
-
-        .filter-mini {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .slider {
-            width: 100%;
-            accent-color: var(--green);
-        }
-
-        .filter-value {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            padding: 9px 13px;
-            background: var(--green-soft);
-            color: var(--green-dark);
-            border-radius: 10px;
-            font-weight: 800;
-            width: fit-content;
-        }
-
-        .clear-btn {
-            border: none;
-            background: #111;
-            color: #fff;
-            padding: 11px 16px;
-            border-radius: 12px;
-            font-weight: 750;
-            cursor: pointer;
-            display: none;
-            transition: 0.25s;
-        }
-
-        .clear-btn.show {
-            display: inline-block;
-        }
-
-        .clear-btn:hover {
-            background: var(--red);
-        }
-
-        /* TABLE */
-        .table-section {
-            grid-column: 1 / -1;
-            padding: 26px;
-        }
-
-        .table-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            height: 42px;
-            min-width: 270px;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            padding: 0 14px;
-            gap: 10px;
-            color: #999;
-            background: #fff;
-        }
-
-        .search-box input {
-            border: none;
-            outline: none;
-            flex: 1;
-            font-family: inherit;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 900px;
-        }
-
-        th {
-            text-align: left;
-            font-size: 14px;
-            color: #111;
-            font-weight: 800;
-            padding: 18px 16px;
-            border-bottom: 1px solid var(--line);
-        }
-
-        td {
-            padding: 18px 16px;
-            border-bottom: 1px solid #f1f1f1;
-            color: #4b4b4b;
-            font-size: 15px;
-        }
-
-        tbody tr:hover {
-            background: #fbfbfb;
-        }
-
-        .status-pill {
-            padding: 7px 11px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 800;
-            display: inline-block;
-        }
-
-        .status-Aktif { background: #fff3d5; color: #b87900; }
-        .status-Pulih { background: #e9fbe7; color: #258b23; }
-        .status-Pemantauan { background: #eaf2ff; color: #1d60c8; }
-        .status-Kritikal { background: #ffe6e6; color: #d92323; }
-
-        .sev {
-            font-weight: 850;
-            padding: 7px 11px;
-            border-radius: 999px;
-            display: inline-block;
-        }
-
-        .sev-low { background: #e9fbe7; color: #258b23; }
-        .sev-med { background: #fff3d5; color: #b87900; }
-        .sev-high { background: #ffe6e6; color: #d92323; }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 18px;
-        }
-
-        .pagination button {
-            border: 1px solid var(--line);
-            background: #fff;
-            min-width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 800;
-        }
-
-        .pagination button.active {
-            background: var(--green);
-            color: #fff;
-            border-color: var(--green);
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 1450px) {
-            .dashboard {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .right-panel {
-                grid-column: 1 / -1;
-                display: grid;
-                grid-template-columns: 1.4fr 1fr;
-            }
-
-            .diagnosis-panel {
-                min-height: auto;
-            }
-        }
-
-        @media (max-width: 1000px) {
-            body {
-                padding: 10px;
-            }
-
-            .nav {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 24px;
-                gap: 20px;
-            }
-
-            .dashboard {
-                grid-template-columns: 1fr;
-                padding: 16px;
-            }
-
-            .right-panel {
-                display: flex;
-                grid-column: auto;
-            }
-
-            .metric-grid,
-            .map-activity-card,
-            .progress-wrap {
-                grid-template-columns: 1fr;
-            }
-
-            .diagnosis-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .timeline {
-                flex-direction: row;
-                overflow-x: auto;
-            }
-
-            .timeline::before {
-                display: none;
-            }
-
-            .complaint-card {
-                position: static;
-                margin-top: 20px;
-            }
-
-            .human-figure {
-                width: 220px;
-            }
-
-            .hotspot {
-                display: none;
-            }
-        }
-    </style>
-</head>
-
-<body>
-<div class="app-shell">
-
-    <!-- WINDOW BAR -->
-    <div class="window-bar">
-        <div class="traffic">
-            <div class="dot red"></div>
-            <div class="dot yellow"></div>
-            <div class="dot green"></div>
-        </div>
-
-        <div class="top-actions">
-            <span>🔔</span>
-            <span>⚙️</span>
-            <div class="avatar">👨‍⚕️</div>
-            <strong style="font-size:18px;color:#777;">Bilik Gerakan</strong>
-        </div>
-    </div>
-
-    <!-- NAV -->
-    <div class="nav">
-        <div class="brand">
-            <div class="brand-logo">∞</div>
-            <h1>BilikGerakan</h1>
-        </div>
-
-        <div class="nav-links">
-            <span class="active">Overview</span>
-            <span>Kes Harian</span>
-            <span>Laporan Epid</span>
-            <span>Diagnosis</span>
-            <span>Lokasi</span>
-        </div>
-    </div>
-
-    <div class="dashboard">
-
-        <!-- LEFT PANEL -->
-        <section class="card diagnosis-panel">
-            <h2 class="section-title">Diagnosis History</h2>
-
-            <div class="diagnosis-layout">
-                <div class="timeline" id="weekTimeline"></div>
-
-                <div class="body-area">
-                    <!-- Simple original SVG body illustration -->
-                    <svg class="human-figure" viewBox="0 0 260 620" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#ffb2a8"/>
-                                <stop offset="100%" stop-color="#ffe0c7"/>
-                            </linearGradient>
-                        </defs>
-                        <ellipse cx="130" cy="596" rx="78" ry="17" fill="none" stroke="#cfcfcf" stroke-width="2"/>
-                        <circle cx="130" cy="62" r="40" fill="url(#bodyGrad)" stroke="#ff8a7a" stroke-width="5"/>
-                        <path d="M95 115 C80 155 73 220 76 310 C78 390 82 470 95 565" fill="none" stroke="#ff8a7a" stroke-width="30" stroke-linecap="round"/>
-                        <path d="M165 115 C180 155 187 220 184 310 C182 390 178 470 165 565" fill="none" stroke="#ff8a7a" stroke-width="30" stroke-linecap="round"/>
-                        <path d="M100 120 C78 165 65 250 50 350" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
-                        <path d="M160 120 C182 165 195 250 210 350" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
-                        <path d="M95 128 C120 105 140 105 165 128 C185 180 185 250 165 322 C145 345 115 345 95 322 C75 250 75 180 95 128Z" fill="#fff3ed" stroke="#ff8a7a" stroke-width="6"/>
-                        <path d="M105 330 C112 410 112 505 103 570" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
-                        <path d="M155 330 C148 410 148 505 157 570" fill="none" stroke="#ff8a7a" stroke-width="26" stroke-linecap="round"/>
-                        <path d="M120 120 L120 325" stroke="#ff6b60" stroke-width="4" opacity="0.6"/>
-                        <path d="M140 120 L140 325" stroke="#ff6b60" stroke-width="4" opacity="0.6"/>
-                    </svg>
-
-                    <div class="hotspot h1"><span class="tip"></span></div>
-                    <div class="hotspot h2"><span class="tip"></span></div>
-                    <div class="hotspot h3"><span class="tip"></span></div>
-                    <div class="hotspot h4"><span class="tip"></span></div>
-                    <div class="hotspot h5"><span class="tip"></span></div>
-
-                    <div class="complaint-card">
-                        <p><strong>Top Diagnosis:</strong> <span id="bodyTopDiagnosis">-</span></p>
-                        <p class="muted">Filtered Cases: <strong id="bodyCaseCount">0</strong></p>
-                        <button class="show-detail" onclick="clearAllFilters()">Show All Detail</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="system-legend">
-                <span><span class="legend-dot"></span>Diagnosis</span>
-                <span><span class="legend-dot"></span>Status</span>
-                <span><span class="legend-dot"></span>Lokasi</span>
-            </div>
-        </section>
-
-        <!-- CENTER PANEL -->
-        <main class="center-panel">
-
-            <div class="metric-grid">
-                <div class="metric-card primary">
-                    <div class="metric-icon">📊</div>
-                    <div class="metric-title">Jumlah Kes</div>
-                    <div class="metric-sub">Kes Berdaftar</div>
-                    <div class="metric-value"><span id="totalCases">0</span> <span class="metric-unit">kes</span></div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon">🦠</div>
-                    <div class="metric-title">Diagnosis Tertinggi</div>
-                    <div class="metric-sub">Paling banyak direkodkan</div>
-                    <div class="metric-value" style="font-size:23px;" id="topDiagnosis">-</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon">📍</div>
-                    <div class="metric-title">Lokasi Terjejas</div>
-                    <div class="metric-sub">Bilangan kawasan</div>
-                    <div class="metric-value"><span id="affectedLocations">0</span></div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon">🚨</div>
-                    <div class="metric-title">Kes Kritikal</div>
-                    <div class="metric-sub">Status Kritikal</div>
-                    <div class="metric-value"><span id="criticalCases">0</span></div>
-                </div>
-            </div>
-
-            <div class="card map-activity-card">
-                <div class="recent-box">
-                    <h2 class="section-title">Recent Cases</h2>
-                    <div class="recent-list" id="recentList"></div>
-                </div>
-
-                <div>
-                    <div id="map"></div>
-                </div>
-            </div>
-
-            <div class="card" style="padding:24px;">
-                <div class="chart-head">
-                    <h2 class="section-title" style="margin:0;">Diagnosis Breakdown</h2>
-                    <span style="color:#888;font-size:14px;">Click chart to filter</span>
-                </div>
-                <div class="chart-container" style="height:260px;">
-                    <canvas id="diagnosisChart"></canvas>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- RIGHT PANEL -->
-        <aside class="right-panel">
-
-            <div class="card stat-card">
-                <div class="chart-head">
-                    <h2 class="section-title" style="margin:0;">Statistic</h2>
-                    <div class="chart-legend">
-                        <span><i class="tiny-dot" style="background:var(--green);"></i>Kes</span>
-                        <span><i class="tiny-dot" style="background:#9cc2ff;"></i>Kritikal</span>
-                        <button class="week-pill">Weekly</button>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="weeklyChart"></canvas>
-                </div>
-            </div>
-
-            <div class="progress-wrap">
-                <div class="card progress-card">
-                    <h2 class="section-title">Recovery Progress</h2>
-                    <div class="progress-circle" id="recoveryRing">
-                        <span id="recoveryPercent">0%</span>
-                    </div>
-                    <p class="progress-note">Peratus kes berstatus Pulih daripada data yang ditapis.</p>
-                </div>
-
-                <div class="card filter-card">
-                    <h2 class="section-title">Filter</h2>
-                    <div class="filter-mini">
-                        <label style="font-weight:800;">Minggu Epid</label>
-                        <input type="range" id="weekSlider" min="0" max="52" value="0" class="slider">
-                        <span class="filter-value" id="filterValue">Semua</span>
-                        <button class="clear-btn" id="clearBtn">Clear Filter</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" style="padding:24px;">
-                <h2 class="section-title">Gender & Age</h2>
-                <div class="chart-container" style="height:250px;">
-                    <canvas id="genderAgeChart"></canvas>
-                </div>
-            </div>
-
-        </aside>
-
-        <!-- TABLE -->
-        <section class="card table-section">
-            <div class="table-top">
-                <h2 class="section-title" style="margin:0;">List Alerts</h2>
-
-                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                    <div class="search-box">
-                        🔎
-                        <input id="searchInput" placeholder="Search diagnosis, status, lokasi..." />
-                    </div>
-                    <button class="clear-btn" id="clearBtn2">Clear Filter</button>
-                </div>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>ID Kes</th>
-                            <th>Epid Week</th>
-                            <th>Diagnosis</th>
-                            <th>Jantina</th>
-                            <th>Umur</th>
-                            <th>Lokasi</th>
-                            <th>Status</th>
-                            <th>Severity</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-
-            <div class="pagination" id="pagination"></div>
-        </section>
-
-    </div>
-</div>
-
-<script>
-    // =========================
-    // DATA - Same concept as previous code
-    // =========================
-    function generateData() {
-        const diseases = ['Demam Berdarah', 'Influenza', 'COVID-19', 'Malaria', 'Typhoid'];
-        const locations = ['Kuala Lumpur', 'Shah Alam', 'Petaling Jaya', 'Klang', 'Subang', 'Ampang', 'Selayang'];
-        const genders = ['Lelaki', 'Perempuan'];
-        const statuses = ['Aktif', 'Pulih', 'Pemantauan', 'Kritikal'];
-
-        const data = [];
-
-        for (let i = 0; i < 250; i++) {
-            const umur = Math.floor(Math.random() * 80) + 5;
-
-            let umurKumpulan;
-            if (umur <= 14) umurKumpulan = '14 dan ke bawah';
-            else if (umur <= 50) umurKumpulan = '15 - 50';
-            else umurKumpulan = '51 dan ke atas';
-
-            const diagnosis = diseases[Math.floor(Math.random() * diseases.length)];
-            const status = statuses[Math.floor(Math.random() * statuses.length)];
-
-            data.push({
-                Case_ID: 'CASE-' + String(i + 1).padStart(5, '0'),
-                Diagnosis: diagnosis,
-                Jantina: genders[Math.floor(Math.random() * genders.length)],
-                Umur: umur,
-                Lokasi: locations[Math.floor(Math.random() * locations.length)],
-                'Minggu Epid': Math.floor(Math.random() * 52) + 1,
-                Status: status,
-                Severity: calculateSeverity(diagnosis, status, umur),
-                Latitud: (Math.random() * 0.4 + 2.9).toFixed(4),
-                Longitud: (Math.random() * 0.7 + 101.3).toFixed(4),
-                Umur_Kumpulan: umurKumpulan
-            });
-        }
-
-        return data;
+// =========================
+// CONFIGURATION
+// =========================
+const CONFIG = {
+    SHEET_ID: 'https://docs.google.com/spreadsheets/d/1HoOHdKoogz_Pyl2urAcjpQraeIgJvbzY846Mm9hzEWY/edit?usp=sharing', // Replace with your Google Sheet ID
+    RANGE: 'Sheet1!A:O', // Covers all 15 columns
+    API_KEY: 'AIzaSyAcFVl3kfS0v57a5BIbhf1952BKMUxT5Qs' // Get from Google Cloud Console
+};
+
+// Your EXACT column names from Google Sheet
+const COLUMN_MAPPING = {
+    bil: 'BIL',
+    epidMinggu: 'Epid Minggu (Tkh Input Notifikasi)',
+    namaPesakit: 'Nama Pesakit',
+    noIdentiti: 'No Pengenalan/No Dokumen Perjalanan Pesakit',
+    umurTahun: 'Umur (Tahun)',
+    jantina: 'Jantina',
+    statusKewarganegaraan: 'Status Kewarganegaraan',
+    keturunan: 'Keturunan',
+    tarikhMati: 'Tarikh Mati',
+    tkhInputNotifikasi: 'Tkh Input Notifikasi',
+    tarikhDiagnosis: 'Tarikh Diagnosis',
+    statusPesakit: 'Status Pesakit',
+    alamat: 'Alamat semasa/kejadian',
+    diagnosis: 'Diagnosis',
+    subDiagnosis: 'Sub Diagnosis'
+};
+
+// =========================
+// DATA MANAGEMENT
+// =========================
+let rawData = [];
+let allData = [];
+let filteredData = [];
+let activeFilters = {};
+let charts = {};
+let map = null;
+let markers = [];
+let currentPage = 1;
+const rowsPerPage = 10;
+let currentSection = 'Overview';
+
+const chartColors = {
+    'Demam Berdarah': '#ef4444',
+    'Influenza': '#f59e0b',
+    'COVID-19': '#3b82f6',
+    'Malaria': '#ec4899',
+    'Typhoid': '#8b5cf6',
+    'Measles': '#10b981',
+    'Chickenpox': '#f97316'
+};
+
+// =========================
+// LOAD GOOGLE SHEET DATA
+// =========================
+async function loadGoogleSheetData() {
+    try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID}/values/${CONFIG.RANGE}?key=${CONFIG.API_KEY}`;
+        
+        console.log('📥 Loading from Google Sheet...');
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.values || data.values.length < 2) {
+            throw new Error('No data found in sheet');
+        }
+        
+        const headers = data.values[0];
+        console.log('📋 Headers found:', headers.length, 'columns');
+        
+        // Transform Google Sheet rows to dashboard format
+        rawData = data.values.slice(1)
+            .map((row, index) => {
+                const obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = row[i] || '';
+                });
+                return transformSheetData(obj, index);
+            })
+            .filter(item => item.Diagnosis && item.Diagnosis.trim() !== ''); // Remove empty rows
+        
+        allData = [...rawData];
+        filteredData = [...rawData];
+        
+        console.log(`✅ Successfully loaded ${rawData.length} patient records`);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Error loading sheet:', error);
+        alert(`Failed to load Google Sheet:\n\n${error.message}\n\nSteps to fix:\n1. Enter Sheet ID in CONFIG\n2. Get API key from Google Cloud\n3. Enable Google Sheets API\n4. Check sheet is accessible`);
+        return false;
     }
+}
 
-    function calculateSeverity(diagnosis, status, age) {
-        const base = {
-            'Demam Berdarah': 7,
-            'COVID-19': 7,
-            'Malaria': 6,
-            'Typhoid': 5,
-            'Influenza': 3
+// =========================
+// TRANSFORM SHEET DATA
+// =========================
+function transformSheetData(sheetRow, index) {
+    try {
+        // Extract location from address
+        const fullAddress = sheetRow[COLUMN_MAPPING.alamat] || 'Tidak Diketahui';
+        const lokasi = extractLocation(fullAddress);
+        
+        // Get epidemiological week
+        let mingguEpid = parseInt(sheetRow[COLUMN_MAPPING.epidMinggu]) || 0;
+        if (!mingguEpid || mingguEpid < 1 || mingguEpid > 52) {
+            mingguEpid = calculateEpidWeek(sheetRow[COLUMN_MAPPING.tkhInputNotifikasi]);
+        }
+        
+        // Get age
+        const umur = parseInt(sheetRow[COLUMN_MAPPING.umurTahun]) || Math.floor(Math.random() * 80) + 5;
+        const umurKumpulan = getAgeGroup(umur);
+        
+        // Get diagnosis
+        const diagnosis = sheetRow[COLUMN_MAPPING.diagnosis]?.trim() || 'Tidak Diketahui';
+        const subDiagnosis = sheetRow[COLUMN_MAPPING.subDiagnosis]?.trim() || '-';
+        
+        // Map status
+        const statusPesakit = sheetRow[COLUMN_MAPPING.statusPesakit]?.trim() || 'Aktif';
+        const status = mapStatus(statusPesakit);
+        
+        // Generate coordinates
+        const coords = generateMalaysiaCoordinates(lokasi);
+        
+        return {
+            Case_ID: `CASE-${String(index + 1).padStart(5, '0')}`,
+            BIL: sheetRow[COLUMN_MAPPING.bil] || index + 1,
+            NamaPesakit: sheetRow[COLUMN_MAPPING.namaPesakit] || '-',
+            NoIdentiti: sheetRow[COLUMN_MAPPING.noIdentiti] || '-',
+            Diagnosis: diagnosis,
+            SubDiagnosis: subDiagnosis,
+            Jantina: sheetRow[COLUMN_MAPPING.jantina]?.trim() || 'Tidak Diketahui',
+            Umur: umur,
+            Umur_Kumpulan: umurKumpulan,
+            Lokasi: lokasi,
+            'Minggu Epid': mingguEpid,
+            Status: status,
+            Severity: calculateSeverity(diagnosis, status, umur),
+            StatusKewarganegaraan: sheetRow[COLUMN_MAPPING.statusKewarganegaraan] || '-',
+            Keturunan: sheetRow[COLUMN_MAPPING.keturunan] || '-',
+            TarikhMati: sheetRow[COLUMN_MAPPING.tarikhMati] || '-',
+            TkhInputNotifikasi: formatDate(sheetRow[COLUMN_MAPPING.tkhInputNotifikasi]),
+            TarikhDiagnosis: formatDate(sheetRow[COLUMN_MAPPING.tarikhDiagnosis]),
+            StatusPesakit: statusPesakit,
+            Alamat: fullAddress,
+            Latitud: coords.lat.toFixed(4),
+            Longitud: coords.lng.toFixed(4)
         };
-
-        const mult = {
-            'Kritikal': 1.5,
-            'Aktif': 1.2,
-            'Pemantauan': 1.0,
-            'Pulih': 0.55
-        };
-
-        let severity = (base[diagnosis] || 5) * (mult[status] || 1);
-
-        if (age < 14) severity += 1;
-        if (age > 60) severity += 1.5;
-
-        return Math.min(Math.max(Math.round(severity), 1), 10);
+    } catch (error) {
+        console.warn('Error transforming row:', error);
+        return null;
     }
+}
 
-    const rawData = generateData();
-    let allData = [...rawData];
-    let filteredData = [...rawData];
-    let activeFilters = {};
-    let charts = {};
-    let map = null;
-    let markers = [];
-    let currentPage = 1;
-    const rowsPerPage = 10;
+// =========================
+// HELPER FUNCTIONS
+// =========================
+function extractLocation(address) {
+    if (!address) return 'Tidak Diketahui';
+    
+    // Extract first part before comma
+    const parts = address.split(',');
+    return parts[0].trim() || 'Tidak Diketahui';
+}
 
-    const chartColors = {
-        'Demam Berdarah': '#ef4444',
-        'Influenza': '#f59e0b',
-        'COVID-19': '#3b82f6',
-        'Malaria': '#ec4899',
-        'Typhoid': '#8b5cf6'
+function calculateEpidWeek(dateStr) {
+    if (!dateStr) return Math.floor(Math.random() * 52) + 1;
+    
+    try {
+        const date = new Date(dateStr);
+        const yearStart = new Date(date.getFullYear(), 0, 1);
+        const diff = date - yearStart;
+        const oneWeek = 7 * 24 * 60 * 60 * 1000;
+        const week = Math.floor(diff / oneWeek) + 1;
+        return Math.min(Math.max(week, 1), 52);
+    } catch {
+        return Math.floor(Math.random() * 52) + 1;
+    }
+}
+
+function getAgeGroup(age) {
+    if (age <= 14) return '14 dan ke bawah';
+    if (age <= 50) return '15 - 50';
+    return '51 dan ke atas';
+}
+
+function mapStatus(statusStr) {
+    const status = statusStr.toLowerCase();
+    
+    if (status.includes('mati') || status.includes('meninggal')) return 'Kritikal';
+    if (status.includes('pulih') || status.includes('sembuh')) return 'Pulih';
+    if (status.includes('pemantau')) return 'Pemantauan';
+    if (status.includes('aktif')) return 'Aktif';
+    
+    return 'Aktif';
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('ms-MY');
+    } catch {
+        return dateStr;
+    }
+}
+
+function calculateSeverity(diagnosis, status, age = 30) {
+    const baseSeverity = {
+        'Demam Berdarah': 8,
+        'COVID-19': 7,
+        'Malaria': 6,
+        'Typhoid': 5,
+        'Influenza': 3,
+        'Measles': 6,
+        'Chickenpox': 4
     };
 
-    // =========================
-    // HELPERS
-    // =========================
-    function countBy(arr, key) {
-        const obj = {};
-        arr.forEach(item => {
-            const val = item[key];
-            obj[val] = (obj[val] || 0) + 1;
-        });
-        return obj;
+    const statusMultiplier = {
+        'Kritikal': 1.5,
+        'Aktif': 1.2,
+        'Pemantauan': 1.0,
+        'Pulih': 0.5
+    };
+
+    let severity = (baseSeverity[diagnosis] || 5) * (statusMultiplier[status] || 1);
+
+    if (age < 5) severity += 2;
+    else if (age < 14) severity += 1;
+    else if (age > 60) severity += 1.5;
+
+    return Math.min(Math.max(Math.round(severity), 1), 10);
+}
+
+function generateMalaysiaCoordinates(location) {
+    // Base coordinates for common Malaysian locations
+    const locations = {
+        'Kuala Lumpur': { lat: 3.1357, lng: 101.6869 },
+        'Shah Alam': { lat: 3.0652, lng: 101.5179 },
+        'Petaling Jaya': { lat: 3.1768, lng: 101.5951 },
+        'Klang': { lat: 3.0285, lng: 101.5516 },
+        'Subang': { lat: 3.0614, lng: 101.5803 },
+        'Ampang': { lat: 3.3319, lng: 101.5654 },
+        'Selayang': { lat: 3.2226, lng: 101.5841 },
+        'Kepala Batas': { lat: 5.1964, lng: 100.5043 },
+        'Penang': { lat: 5.3520, lng: 100.3330 },
+        'Ipoh': { lat: 4.5921, lng: 101.0901 },
+        'Malacca': { lat: 2.1896, lng: 102.2501 },
+        'Johor Bahru': { lat: 1.4854, lng: 103.7618 }
+    };
+    
+    // Find matching location
+    let baseCoords = locations['Kuala Lumpur'];
+    for (const key in locations) {
+        if (location.toLowerCase().includes(key.toLowerCase())) {
+            baseCoords = locations[key];
+            break;
+        }
     }
+    
+    // Add small random variation
+    return {
+        lat: baseCoords.lat + (Math.random() - 0.5) * 0.1,
+        lng: baseCoords.lng + (Math.random() - 0.5) * 0.1
+    };
+}
 
-    function getTopDiagnosis() {
-        const counts = countBy(filteredData, 'Diagnosis');
-        return Object.keys(counts).sort((a,b) => counts[b] - counts[a])[0] || '-';
-    }
+function countBy(arr, key) {
+    const obj = {};
+    arr.forEach(item => {
+        const val = item[key];
+        obj[val] = (obj[val] || 0) + 1;
+    });
+    return obj;
+}
 
-    function updateKPIs() {
-        document.getElementById('totalCases').textContent = filteredData.length;
-        document.getElementById('topDiagnosis').textContent = getTopDiagnosis();
-        document.getElementById('affectedLocations').textContent = new Set(filteredData.map(d => d.Lokasi)).size;
-        document.getElementById('criticalCases').textContent = filteredData.filter(d => d.Status === 'Kritikal').length;
+function getTopDiagnosis() {
+    const counts = countBy(filteredData, 'Diagnosis');
+    return Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0] || '-';
+}
 
-        document.getElementById('bodyTopDiagnosis').textContent = getTopDiagnosis();
-        document.getElementById('bodyCaseCount').textContent = filteredData.length;
+// =========================
+// NAV FUNCTIONALITY
+// =========================
+function setActive(element, section) {
+    document.querySelectorAll('.nav-links span').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+    currentSection = section;
+    console.log('Navigated to:', section);
+}
 
-        updateRecoveryRing();
-        updateTimeline();
-        updateHotspots();
-    }
+// =========================
+// UPDATE KPIs
+// =========================
+function updateKPIs() {
+    document.getElementById('totalCases').textContent = filteredData.length;
+    document.getElementById('topDiagnosis').textContent = getTopDiagnosis();
+    document.getElementById('affectedLocations').textContent = new Set(filteredData.map(d => d.Lokasi)).size;
+    document.getElementById('criticalCases').textContent = filteredData.filter(d => d.Status === 'Kritikal').length;
 
-    function updateRecoveryRing() {
-        const total = filteredData.length || 1;
-        const pulih = filteredData.filter(d => d.Status === 'Pulih').length;
-        const pct = Math.round((pulih / total) * 100);
-        document.getElementById('recoveryPercent').textContent = pct + '%';
-        document.getElementById('recoveryRing').style.background =
-            `conic-gradient(var(--green) 0deg, var(--green) ${pct * 3.6}deg, #edf0f2 ${pct * 3.6}deg)`;
-    }
+    document.getElementById('bodyTopDiagnosis').textContent = getTopDiagnosis();
+    document.getElementById('bodyCaseCount').textContent = filteredData.length;
 
-    function updateTimeline() {
-        const timeline = document.getElementById('weekTimeline');
-        const selectedWeek = activeFilters.week || null;
-        const weeks = [52, 40, 30, 20, 10, 1];
+    updateRecoveryRing();
+    updateYearTimeline();
+}
 
-        timeline.innerHTML = weeks.map(w => `
-            <div class="timeline-item ${selectedWeek === w ? 'active' : ''}" onclick="filterByWeek(${w})">
-                <span class="timeline-bullet"></span>
-                <span>ME ${w}</span>
-            </div>
-        `).join('');
-    }
+function updateRecoveryRing() {
+    const total = filteredData.length || 1;
+    const pulih = filteredData.filter(d => d.Status === 'Pulih').length;
+    const pct = Math.round((pulih / total) * 100);
+    document.getElementById('recoveryPercent').textContent = pct + '%';
+    document.getElementById('recoveryRing').style.background =
+        `conic-gradient(var(--green) 0deg, var(--green) ${pct * 3.6}deg, #edf0f2 ${pct * 3.6}deg)`;
+}
 
-    function updateHotspots() {
-        const counts = countBy(filteredData, 'Diagnosis');
-        const top = Object.keys(counts).sort((a,b) => counts[b] - counts[a]).slice(0,5);
-        const hotspots = document.querySelectorAll('.hotspot');
+function updateYearTimeline() {
+    const timeline = document.getElementById('yearTimeline');
+    const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
+    const selectedYear = activeFilters.year || null;
 
-        hotspots.forEach((h, i) => {
-            const diagnosis = top[i] || '-';
-            h.dataset.diagnosis = diagnosis;
-            h.querySelector('.tip').textContent = diagnosis + (counts[diagnosis] ? `: ${counts[diagnosis]} kes` : '');
-            h.onclick = () => {
-                if (diagnosis !== '-') filterByDiagnosis(diagnosis);
+    timeline.innerHTML = years.map(y => `
+        <div class="timeline-item ${selectedYear === y ? 'active' : ''}" onclick="filterByYear(${y})">
+            <span class="timeline-bullet"></span>
+            <span>${y}</span>
+        </div>
+    `).join('');
+}
+
+// =========================
+// CHARTS
+// =========================
+function updateCharts() {
+    updateDiagnosisChart();
+    updateWeeklyChart();
+    updateGenderAgeChart();
+}
+
+function updateDiagnosisChart() {
+    const counts = countBy(filteredData, 'Diagnosis');
+    const labels = Object.keys(counts);
+    const values = Object.values(counts);
+
+    if (charts.diagnosis) charts.diagnosis.destroy();
+
+    charts.diagnosis = new Chart(document.getElementById('diagnosisChart'), {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: labels.map(l => chartColors[l] || '#999'),
+                borderWidth: 5,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        boxWidth: 8,
+                        font: { family: 'Inter', size: 13 }
+                    }
+                },
+                datalabels: {
+                    color: '#111',
+                    font: { weight: '800' },
+                    formatter: value => value
+                }
+            },
+            onClick: (evt, elements) => {
+                if (elements.length) {
+                    const diagnosis = labels[elements[0].index];
+                    filterByDiagnosis(diagnosis);
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+}
+
+function updateWeeklyChart() {
+    const weeks = Array.from({ length: 52 }, (_, i) => i + 1);
+    const cases = weeks.map(w => filteredData.filter(d => d['Minggu Epid'] === w).length);
+    const critical = weeks.map(w => filteredData.filter(d => d['Minggu Epid'] === w && d.Status === 'Kritikal').length);
+
+    if (charts.weekly) charts.weekly.destroy();
+
+    charts.weekly = new Chart(document.getElementById('weeklyChart'), {
+        type: 'line',
+        data: {
+            labels: weeks.map(w => 'ME ' + w),
+            datasets: [
+                {
+                    label: 'Kes',
+                    data: cases,
+                    borderColor: '#38a832',
+                    backgroundColor: 'rgba(56,168,50,0.08)',
+                    tension: 0.45,
+                    fill: true,
+                    pointRadius: 0,
+                    borderWidth: 3
+                },
+                {
+                    label: 'Kritikal',
+                    data: critical,
+                    borderColor: '#9cc2ff',
+                    backgroundColor: 'rgba(156,194,255,0.12)',
+                    tension: 0.45,
+                    fill: true,
+                    pointRadius: 0,
+                    borderWidth: 3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                datalabels: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { maxTicksLimit: 7, color: '#888' }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f0f0f0' },
+                    ticks: { color: '#888' }
+                }
+            }
+        }
+    });
+}
+
+function updateGenderAgeChart() {
+    const genderCounts = countBy(filteredData, 'Jantina');
+    const ageCounts = countBy(filteredData, 'Umur_Kumpulan');
+
+    if (charts.genderAge) charts.genderAge.destroy();
+
+    charts.genderAge = new Chart(document.getElementById('genderAgeChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Lelaki', 'Perempuan', '≤14', '15-50', '≥51'],
+            datasets: [{
+                label: 'Bilangan',
+                data: [
+                    genderCounts['Lelaki'] || 0,
+                    genderCounts['Perempuan'] || 0,
+                    ageCounts['14 dan ke bawah'] || 0,
+                    ageCounts['15 - 50'] || 0,
+                    ageCounts['51 dan ke atas'] || 0
+                ],
+                backgroundColor: ['#3b82f6', '#ec4899', '#38a832', '#f59e0b', '#8b5cf6'],
+                borderRadius: 12
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    color: '#111',
+                    anchor: 'end',
+                    align: 'top',
+                    font: { weight: '800' }
+                }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { beginAtZero: true, grid: { color: '#f2f2f2' } }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+}
+
+// =========================
+// MAP
+// =========================
+function updateMap() {
+    if (!map) return;
+
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+
+    const locCounts = {};
+
+    filteredData.forEach(d => {
+        const key = `${d.Latitud},${d.Longitud}`;
+        if (!locCounts[key]) {
+            locCounts[key] = {
+                count: 0,
+                lat: parseFloat(d.Latitud),
+                lng: parseFloat(d.Longitud),
+                diagnosis: d.Diagnosis,
+                lokasi: d.Lokasi
             };
-        });
-    }
+        }
+        locCounts[key].count++;
+    });
 
-    // =========================
-    // CHARTS
-    // =========================
-    function updateCharts() {
-        updateDiagnosisChart();
-        updateWeeklyChart();
-        updateGenderAgeChart();
-    }
+    Object.values(locCounts).forEach(loc => {
+        const color = chartColors[loc.diagnosis] || '#38a832';
 
-    function updateDiagnosisChart() {
-        const counts = countBy(filteredData, 'Diagnosis');
-        const labels = Object.keys(counts);
-        const values = Object.values(counts);
-
-        if (charts.diagnosis) charts.diagnosis.destroy();
-
-        charts.diagnosis = new Chart(document.getElementById('diagnosisChart'), {
-            type: 'doughnut',
-            data: {
-                labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: labels.map(l => chartColors[l] || '#999'),
-                    borderWidth: 5,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '62%',
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            usePointStyle: true,
-                            boxWidth: 8,
-                            font: { family: 'Inter', size: 13 }
-                        }
-                    },
-                    datalabels: {
-                        color: '#111',
-                        font: { weight: '800' },
-                        formatter: value => value
-                    }
-                },
-                onClick: (evt, elements) => {
-                    if (elements.length) {
-                        const diagnosis = labels[elements[0].index];
-                        filterByDiagnosis(diagnosis);
-                    }
-                }
-            },
-            plugins: [ChartDataLabels]
-        });
-    }
-
-    function updateWeeklyChart() {
-        const weeks = Array.from({ length: 52 }, (_, i) => i + 1);
-
-        const cases = weeks.map(w => filteredData.filter(d => d['Minggu Epid'] === w).length);
-        const critical = weeks.map(w => filteredData.filter(d => d['Minggu Epid'] === w && d.Status === 'Kritikal').length);
-
-        if (charts.weekly) charts.weekly.destroy();
-
-        charts.weekly = new Chart(document.getElementById('weeklyChart'), {
-            type: 'line',
-            data: {
-                labels: weeks.map(w => 'ME ' + w),
-                datasets: [
-                    {
-                        label: 'Kes',
-                        data: cases,
-                        borderColor: '#38a832',
-                        backgroundColor: 'rgba(56,168,50,0.08)',
-                        tension: 0.45,
-                        fill: true,
-                        pointRadius: 0,
-                        borderWidth: 3
-                    },
-                    {
-                        label: 'Kritikal',
-                        data: critical,
-                        borderColor: '#9cc2ff',
-                        backgroundColor: 'rgba(156,194,255,0.12)',
-                        tension: 0.45,
-                        fill: true,
-                        pointRadius: 0,
-                        borderWidth: 3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    datalabels: { display: false }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { maxTicksLimit: 7, color: '#888' }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#f0f0f0' },
-                        ticks: { color: '#888' }
-                    }
-                }
-            }
-        });
-    }
-
-    function updateGenderAgeChart() {
-        const genderCounts = countBy(filteredData, 'Jantina');
-        const ageCounts = countBy(filteredData, 'Umur_Kumpulan');
-
-        if (charts.genderAge) charts.genderAge.destroy();
-
-        charts.genderAge = new Chart(document.getElementById('genderAgeChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Lelaki', 'Perempuan', '≤14', '15-50', '≥51'],
-                datasets: [{
-                    label: 'Bilangan',
-                    data: [
-                        genderCounts['Lelaki'] || 0,
-                        genderCounts['Perempuan'] || 0,
-                        ageCounts['14 dan ke bawah'] || 0,
-                        ageCounts['15 - 50'] || 0,
-                        ageCounts['51 dan ke atas'] || 0
-                    ],
-                    backgroundColor: ['#3b82f6', '#ec4899', '#38a832', '#f59e0b', '#8b5cf6'],
-                    borderRadius: 12
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    datalabels: {
-                        color: '#111',
-                        anchor: 'end',
-                        align: 'top',
-                        font: { weight: '800' }
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false } },
-                    y: { beginAtZero: true, grid: { color: '#f2f2f2' } }
-                }
-            },
-            plugins: [ChartDataLabels]
-        });
-    }
-
-    // =========================
-    // MAP
-    // =========================
-    function updateMap() {
-        if (!map) return;
-
-        markers.forEach(m => map.removeLayer(m));
-        markers = [];
-
-        const locCounts = {};
-
-        filteredData.forEach(d => {
-            const key = `${d.Latitud},${d.Longitud}`;
-            if (!locCounts[key]) {
-                locCounts[key] = {
-                    count: 0,
-                    lat: parseFloat(d.Latitud),
-                    lng: parseFloat(d.Longitud),
-                    diagnosis: d.Diagnosis
-                };
-            }
-            locCounts[key].count++;
+        const circle = L.circleMarker([loc.lat, loc.lng], {
+            radius: Math.sqrt(loc.count) * 5 + 7,
+            fillColor: color,
+            color: '#ffffff',
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 0.82
         });
 
-        Object.values(locCounts).forEach(loc => {
-            const color = chartColors[loc.diagnosis] || '#38a832';
+        circle.bindPopup(`<strong>${loc.lokasi}</strong><br>${loc.diagnosis}<br>Kes: ${loc.count}`);
+        circle.on('click', () => filterByLocation(loc.lat, loc.lng));
+        circle.addTo(map);
+        markers.push(circle);
+    });
+}
 
-            const circle = L.circleMarker([loc.lat, loc.lng], {
-                radius: Math.sqrt(loc.count) * 5 + 7,
-                fillColor: color,
-                color: '#ffffff',
-                weight: 3,
-                opacity: 1,
-                fillOpacity: 0.82
-            });
+// =========================
+// RECENT CASES
+// =========================
+function updateRecent() {
+    const recent = filteredData.slice(-4).reverse();
 
-            circle.bindPopup(`<strong>${loc.diagnosis}</strong><br>Kes: ${loc.count}`);
-            circle.on('click', () => filterByLocation(loc.lat, loc.lng));
-            circle.addTo(map);
-            markers.push(circle);
-        });
-    }
-
-    // =========================
-    // RECENT + TABLE
-    // =========================
-    function updateRecent() {
-        const recent = filteredData.slice(-4).reverse();
-
-        document.getElementById('recentList').innerHTML = recent.map(r => `
-            <div class="recent-item">
-                <div class="recent-top">
-                    <div class="case-avatar">${r.Case_ID.slice(-2)}</div>
-                    <div>
-                        <div class="case-id">${r.Case_ID}</div>
-                        <div class="recent-meta">ME ${r['Minggu Epid']} • ${r.Lokasi}</div>
-                    </div>
+    document.getElementById('recentList').innerHTML = recent.map(r => `
+        <div class="recent-item">
+            <div class="recent-top">
+                <div class="case-avatar">${r.Case_ID.slice(-2)}</div>
+                <div>
+                    <div class="case-id">${r.NamaPesakit || r.Case_ID}</div>
+                    <div class="recent-meta">ME ${r['Minggu Epid']} • ${r.Lokasi}</div>
                 </div>
-                <div class="recent-diagnosis">${r.Diagnosis}</div>
             </div>
-        `).join('') || '<p style="color:#999;">Tiada rekod.</p>';
+            <div class="recent-diagnosis">${r.Diagnosis}</div>
+            ${r.SubDiagnosis !== '-' ? `<div class="recent-meta" style="margin-top:5px;">${r.SubDiagnosis}</div>` : ''}
+        </div>
+    `).join('') || '<p style="color:#999;">Tiada rekod.</p>';
+}
+
+// =========================
+// TABLE
+// =========================
+function updateTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+    let tableData = filteredData;
+
+    if (search) {
+        tableData = tableData.filter(r =>
+            r.Diagnosis.toLowerCase().includes(search) ||
+            r.Status.toLowerCase().includes(search) ||
+            r.Lokasi.toLowerCase().includes(search) ||
+            r.Jantina.toLowerCase().includes(search) ||
+            r.NamaPesakit.toLowerCase().includes(search) ||
+            r.Case_ID.toLowerCase().includes(search)
+        );
     }
 
-    function updateTable() {
-        const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageData = tableData.slice(start, end);
 
-        let tableData = filteredData;
+    document.getElementById('tableBody').innerHTML = pageData.map((r, i) => {
+        let sevClass = 'sev-low';
+        if (r.Severity >= 7) sevClass = 'sev-high';
+        else if (r.Severity >= 4) sevClass = 'sev-med';
 
-        if (search) {
-            tableData = tableData.filter(r =>
-                r.Diagnosis.toLowerCase().includes(search) ||
-                r.Status.toLowerCase().includes(search) ||
-                r.Lokasi.toLowerCase().includes(search) ||
-                r.Jantina.toLowerCase().includes(search) ||
-                r.Case_ID.toLowerCase().includes(search)
-            );
+        return `
+            <tr>
+                <td>${start + i + 1}</td>
+                <td><strong>${r.Case_ID}</strong></td>
+                <td>ME ${r['Minggu Epid']}</td>
+                <td><strong>${r.Diagnosis}</strong></td>
+                <td>${r.Jantina}</td>
+                <td>${r.Umur} tahun</td>
+                <td>${r.Lokasi}</td>
+                <td><span class="status-pill status-${r.Status}">${r.Status}</span></td>
+                <td><span class="sev ${sevClass}">${r.Severity}/10</span></td>
+            </tr>
+        `;
+    }).join('');
+
+    const pages = Math.ceil(tableData.length / rowsPerPage) || 1;
+
+    document.getElementById('pagination').innerHTML = Array.from({ length: Math.min(pages, 5) }, (_, i) => i + 1)
+        .map(p => `<button class="${p === currentPage ? 'active' : ''}" onclick="currentPage=${p}; updateTable();">${p}</button>`)
+        .join('');
+}
+
+// =========================
+// FILTERS
+// =========================
+function filterByDiagnosis(diagnosis) {
+    activeFilters.diagnosis = diagnosis;
+    applyFilters();
+}
+
+function filterByYear(year) {
+    activeFilters.year = year;
+    applyFilters();
+}
+
+function filterByWeek(week) {
+    activeFilters.week = parseInt(week);
+    document.getElementById('weekSlider').value = week;
+    document.getElementById('filterValue').textContent = week === 0 ? 'Semua' : 'ME ' + week;
+    applyFilters();
+}
+
+function filterByLocation(lat, lng) {
+    activeFilters.location = { lat, lng };
+    applyFilters();
+}
+
+function applyFilters() {
+    filteredData = allData.filter(record => {
+        if (activeFilters.diagnosis && record.Diagnosis !== activeFilters.diagnosis) return false;
+        if (activeFilters.week && record['Minggu Epid'] !== activeFilters.week) return false;
+
+        if (activeFilters.location) {
+            const threshold = 0.1;
+            const match =
+                Math.abs(parseFloat(record.Latitud) - activeFilters.location.lat) < threshold &&
+                Math.abs(parseFloat(record.Longitud) - activeFilters.location.lng) < threshold;
+
+            if (!match) return false;
         }
 
-        const start = (currentPage - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        const pageData = tableData.slice(start, end);
-
-        document.getElementById('tableBody').innerHTML = pageData.map((r, i) => {
-            let sevClass = 'sev-low';
-            if (r.Severity >= 7) sevClass = 'sev-high';
-            else if (r.Severity >= 4) sevClass = 'sev-med';
-
-            return `
-                <tr>
-                    <td>${start + i + 1}</td>
-                    <td><strong>${r.Case_ID}</strong></td>
-                    <td>ME ${r['Minggu Epid']}</td>
-                    <td><strong>${r.Diagnosis}</strong></td>
-                    <td>${r.Jantina}</td>
-                    <td>${r.Umur} tahun</td>
-                    <td>${r.Lokasi}</td>
-                    <td><span class="status-pill status-${r.Status}">${r.Status}</span></td>
-                    <td><span class="sev ${sevClass}">${r.Severity}/10</span></td>
-                </tr>
-            `;
-        }).join('');
-
-        const pages = Math.ceil(tableData.length / rowsPerPage) || 1;
-
-        document.getElementById('pagination').innerHTML = Array.from({ length: pages }, (_, i) => i + 1)
-            .map(p => `<button class="${p === currentPage ? 'active' : ''}" onclick="currentPage=${p}; updateTable();">${p}</button>`)
-            .join('');
-    }
-
-    // =========================
-    // FILTERS
-    // =========================
-    function filterByDiagnosis(diagnosis) {
-        activeFilters.diagnosis = diagnosis;
-        applyFilters();
-    }
-
-    function filterByWeek(week) {
-        activeFilters.week = parseInt(week);
-        document.getElementById('weekSlider').value = week;
-        document.getElementById('filterValue').textContent = week === 0 ? 'Semua' : 'ME ' + week;
-        applyFilters();
-    }
-
-    function filterByLocation(lat, lng) {
-        activeFilters.location = { lat, lng };
-        applyFilters();
-    }
-
-    function applyFilters() {
-        filteredData = allData.filter(record => {
-            if (activeFilters.diagnosis && record.Diagnosis !== activeFilters.diagnosis) return false;
-            if (activeFilters.week && record['Minggu Epid'] !== activeFilters.week) return false;
-
-            if (activeFilters.location) {
-                const threshold = 0.01;
-                const match =
-                    Math.abs(parseFloat(record.Latitud) - activeFilters.location.lat) < threshold &&
-                    Math.abs(parseFloat(record.Longitud) - activeFilters.location.lng) < threshold;
-
-                if (!match) return false;
-            }
-
-            return true;
-        });
-
-        currentPage = 1;
-        refreshDashboard();
-        updateClearButton();
-    }
-
-    function clearAllFilters() {
-        activeFilters = {};
-        filteredData = [...allData];
-        currentPage = 1;
-
-        document.getElementById('weekSlider').value = 0;
-        document.getElementById('filterValue').textContent = 'Semua';
-        document.getElementById('searchInput').value = '';
-
-        refreshDashboard();
-        updateClearButton();
-    }
-
-    function updateClearButton() {
-        const hasFilters = Object.keys(activeFilters).length > 0;
-
-        document.getElementById('clearBtn').classList.toggle('show', hasFilters);
-        document.getElementById('clearBtn2').classList.toggle('show', hasFilters);
-    }
-
-    function refreshDashboard() {
-        updateKPIs();
-        updateCharts();
-        updateMap();
-        updateRecent();
-        updateTable();
-    }
-
-    // =========================
-    // INIT
-    // =========================
-    window.addEventListener('load', () => {
-        map = L.map('map', {
-            zoomControl: false
-        }).setView([3.1357, 101.6869], 10);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap',
-            maxZoom: 19
-        }).addTo(map);
-
-        setTimeout(() => {
-            map.invalidateSize();
-            refreshDashboard();
-        }, 300);
-
-        document.getElementById('weekSlider').addEventListener('input', e => {
-            const week = parseInt(e.target.value);
-            document.getElementById('filterValue').textContent = week === 0 ? 'Semua' : 'ME ' + week;
-
-            if (week === 0) delete activeFilters.week;
-            else activeFilters.week = week;
-
-            applyFilters();
-        });
-
-        document.getElementById('clearBtn').addEventListener('click', clearAllFilters);
-        document.getElementById('clearBtn2').addEventListener('click', clearAllFilters);
-
-        document.getElementById('searchInput').addEventListener('input', () => {
-            currentPage = 1;
-            updateTable();
-        });
+        return true;
     });
+
+    currentPage = 1;
+    refreshDashboard();
+    updateClearButton();
+}
+
+function clearAllFilters() {
+    activeFilters = {};
+    filteredData = [...allData];
+    currentPage = 1;
+
+    document.getElementById('weekSlider').value = 0;
+    document.getElementById('filterValue').textContent = 'Semua';
+    document.getElementById('searchInput').value = '';
+
+    refreshDashboard();
+    updateClearButton();
+}
+
+function updateClearButton() {
+    const hasFilters = Object.keys(activeFilters).length > 0;
+    document.getElementById('clearBtn').classList.toggle('show', hasFilters);
+    document.getElementById('clearBtn2').classList.toggle('show', hasFilters);
+}
+
+function refreshDashboard() {
+    updateKPIs();
+    updateCharts();
+    updateMap();
+    updateRecent();
+    updateTable();
+}
+
+// =========================
+// INITIALIZE
+// =========================
+window.addEventListener('load', async () => {
+    // Show loading indicator
+    const loader = document.createElement('div');
+    loader.id = 'loadingIndicator';
+    loader.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 30px 50px;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        z-index: 9999;
+        text-align: center;
+        font-weight: 600;
+    `;
+    loader.innerHTML = '📥 Loading Patient Data from Google Sheet...';
+    document.body.appendChild(loader);
+
+    // Load Google Sheet data
+    const loaded = await loadGoogleSheetData();
+    loader.remove();
+
+    if (!loaded) {
+        return;
+    }
+
+    // Initialize map
+    map = L.map('map', {
+        zoomControl: false
+    }).setView([3.1357, 101.6869], 10);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    setTimeout(() => {
+        map.invalidateSize();
+        refreshDashboard();
+    }, 300);
+
+    // Week slider event
+    document.getElementById('weekSlider').addEventListener('input', e => {
+        const week = parseInt(e.target.value);
+        document.getElementById('filterValue').textContent = week === 0 ? 'Semua' : 'ME ' + week;
+
+        if (week === 0) delete activeFilters.week;
+        else activeFilters.week = week;
+
+        applyFilters();
+    });
+
+    // Clear buttons
+    document.getElementById('clearBtn').addEventListener('click', clearAllFilters);
+    document.getElementById('clearBtn2').addEventListener('click', clearAllFilters);
+
+    // Search input
+    document.getElementById('searchInput').addEventListener('input', () => {
+        currentPage = 1;
+        updateTable();
+    });
+});
 </script>
-</body>
-</html>
