@@ -5,23 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BILIK GERAKAN - Health Dashboard</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            --primary: #4169e1;
-            --primary-dark: #2e4db8;
-            --bg-light: #f8f9fa;
-            --text-dark: #1f2937;
-            --text-gray: #6b7280;
-            --border-color: #e5e7eb;
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #06b6d4;
             --success: #10b981;
-            --danger: #ef4444;
             --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
         }
         
         * {
@@ -31,177 +40,255 @@
         }
         
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: var(--text-dark);
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--gray-800);
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
         }
         
-        /* Header */
+        /* ===== HEADER ===== */
         .header {
-            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
-            padding: 30px 40px;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.3);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .header-left {
+            position: relative;
+            z-index: 1;
         }
         
         .header-left h1 {
-            font-size: 2.5em;
+            font-size: 3em;
             font-weight: 800;
             margin-bottom: 5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header-left p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            font-weight: 300;
+            letter-spacing: 0.5px;
         }
         
         .header-right {
             display: flex;
-            align-items: center;
-            gap: 20px;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
             flex-wrap: wrap;
+            justify-content: flex-end;
         }
         
-        .status-indicator {
+        .status-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
+            gap: 12px;
         }
         
-        .pulse-dot {
+        .status-dot {
             width: 12px;
             height: 12px;
             background: var(--success);
             border-radius: 50%;
             animation: pulse 2s infinite;
+            box-shadow: 0 0 10px var(--success);
         }
         
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
         }
         
-        /* Content */
-        .content {
-            padding: 40px;
-        }
-        
-        /* Slicer/Filter */
-        .filter-section {
-            background: var(--bg-light);
-            padding: 20px;
-            border-radius: 12px;
+        /* ===== MAIN GRID ===== */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
             margin-bottom: 30px;
+        }
+        
+        /* ===== FILTER SECTION ===== */
+        .filter-card {
+            grid-column: 1 / -1;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--primary);
+        }
+        
+        .filter-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-title i {
+            color: var(--primary);
+        }
+        
+        .filter-group {
             display: flex;
             gap: 20px;
             align-items: center;
             flex-wrap: wrap;
         }
         
-        .filter-group {
+        .filter-item {
             display: flex;
             align-items: center;
             gap: 15px;
+            flex: 1;
+            min-width: 250px;
         }
         
         .filter-label {
             font-weight: 600;
-            color: var(--text-dark);
+            color: var(--gray-700);
+            font-size: 0.95em;
         }
         
         .slider {
-            width: 200px;
-            height: 6px;
+            flex: 1;
+            height: 8px;
             border-radius: 5px;
-            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            background: linear-gradient(to right, var(--primary), var(--secondary));
             outline: none;
             -webkit-appearance: none;
             appearance: none;
+            cursor: pointer;
         }
         
         .slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: white;
             border: 3px solid var(--primary);
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
         }
         
         .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: white;
             border: 3px solid var(--primary);
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
         }
         
         .filter-value {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
             font-weight: 700;
-            min-width: 80px;
+            min-width: 90px;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
         
         .clear-btn {
-            background: var(--danger);
+            background: linear-gradient(135deg, var(--danger), #dc2626);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
             display: none;
+            font-size: 0.9em;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
         
         .clear-btn:hover {
-            background: #dc2626;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
         }
         
         .clear-btn.show {
             display: inline-block;
+            animation: slideIn 0.3s ease;
         }
         
-        /* KPI Cards */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* ===== KPI CARDS ===== */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
+            grid-column: 1 / -1;
             margin-bottom: 30px;
         }
         
         .kpi-card {
             background: white;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            border: 2px solid transparent;
         }
         
         .kpi-card::before {
@@ -210,8 +297,8 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             transform: scaleX(0);
             transform-origin: left;
             transition: transform 0.5s ease;
@@ -219,163 +306,224 @@
         
         .kpi-card:hover {
             border-color: var(--primary);
-            box-shadow: 0 8px 16px rgba(65, 105, 225, 0.15);
-            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.15);
+            transform: translateY(-5px);
         }
         
         .kpi-card:hover::before {
             transform: scaleX(1);
         }
         
+        .kpi-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
         .kpi-label {
-            color: var(--text-gray);
-            font-size: 0.9em;
+            color: var(--gray-600);
+            font-size: 0.85em;
             font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
             margin-bottom: 10px;
         }
         
         .kpi-value {
-            font-size: 2.5em;
+            font-size: 2.8em;
             font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
         }
         
         .kpi-change {
-            font-size: 0.85em;
+            font-size: 0.9em;
             color: var(--success);
-            font-weight: 500;
+            font-weight: 600;
         }
         
-        /* Charts Grid */
+        /* ===== CHARTS ===== */
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            grid-column: 1 / -1;
             margin-bottom: 30px;
         }
         
         .chart-card {
             background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
         
         .chart-card:hover {
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
             border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+        
+        .chart-card.interactive cursor {
+            cursor: pointer;
         }
         
         .chart-title {
             font-size: 1.2em;
             font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 20px;
+            color: var(--gray-800);
+            margin-bottom: 25px;
             padding-bottom: 15px;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-title i {
+            color: var(--primary);
+            font-size: 1.3em;
         }
         
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 350px;
         }
         
-        /* Map Section */
+        /* ===== MAP & SIDEBAR ===== */
         .map-section {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 20px;
+            gap: 30px;
+            grid-column: 1 / -1;
             margin-bottom: 30px;
         }
         
         .map-card {
             background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
         }
         
         #map {
             width: 100%;
-            height: 400px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
+            height: 450px;
+            border-radius: 12px;
+            border: 2px solid var(--gray-100);
         }
         
-        .recent-card {
+        .sidebar-card {
             background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--secondary);
+        }
+        
+        .sidebar-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-title i {
+            color: var(--secondary);
         }
         
         .recent-list {
             display: flex;
             flex-direction: column;
             gap: 12px;
-            max-height: 400px;
-            overflow-y: auto;
         }
         
         .recent-item {
-            padding: 12px;
-            background: var(--bg-light);
-            border-radius: 8px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(6, 182, 212, 0.05));
+            border-radius: 10px;
             border-left: 4px solid var(--primary);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         
         .recent-item:hover {
-            background: rgba(65, 105, 225, 0.05);
-            transform: translateX(4px);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(6, 182, 212, 0.1));
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
         
         .recent-name {
             font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 4px;
+            color: var(--gray-800);
+            margin-bottom: 5px;
+            font-size: 0.95em;
         }
         
         .recent-diagnosis {
             font-size: 0.85em;
-            color: var(--text-gray);
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 5px;
         }
         
-        /* Table */
+        .recent-location {
+            font-size: 0.8em;
+            color: var(--gray-500);
+        }
+        
+        /* ===== TABLE ===== */
         .table-section {
-            margin-top: 30px;
-        }
-        
-        .table-card {
+            grid-column: 1 / -1;
             background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            overflow-x: auto;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
         }
         
         .table-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--gray-100);
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 20px;
         }
         
         .table-title {
-            font-size: 1.2em;
+            font-size: 1.3em;
             font-weight: 700;
-            color: var(--text-dark);
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .table-title i {
+            color: var(--primary);
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
         }
         
         table {
@@ -384,67 +532,130 @@
         }
         
         thead {
-            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
         }
         
         th {
-            padding: 15px;
+            padding: 18px;
             text-align: left;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 0.9em;
             text-transform: uppercase;
-            font-size: 0.85em;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
         }
         
         td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 0.95em;
+        }
+        
+        tbody tr {
+            transition: all 0.3s ease;
         }
         
         tbody tr:hover {
-            background: var(--bg-light);
+            background: var(--gray-50);
+            box-shadow: inset 0 0 10px rgba(37, 99, 235, 0.05);
         }
         
-        /* Pagination */
+        .severity-critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        
+        .severity-high {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        
+        .severity-medium {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1e40af;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        
+        .severity-low {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        
+        /* ===== PAGINATION ===== */
         .pagination {
             display: flex;
             justify-content: center;
             gap: 8px;
-            margin-top: 20px;
+            margin-top: 25px;
             flex-wrap: wrap;
         }
         
         .pagination button {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border: 2px solid var(--gray-200);
             background: white;
-            color: var(--text-dark);
-            border-radius: 6px;
+            color: var(--gray-700);
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
+            font-size: 0.95em;
         }
         
-        .pagination button:hover,
+        .pagination button:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+        
         .pagination button.active {
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
         
+        /* ===== FOOTER ===== */
         .footer {
             text-align: center;
-            padding: 20px;
-            color: var(--text-gray);
-            border-top: 1px solid var(--border-color);
-            margin-top: 30px;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-top: 3px solid var(--primary);
+            color: var(--gray-600);
         }
         
-        @media (max-width: 1024px) {
-            .map-section {
+        .footer p {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.05em;
+            color: var(--gray-800);
+        }
+        
+        .footer small {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1400px) {
+            .charts-grid {
                 grid-template-columns: 1fr;
             }
-            .charts-grid {
+            .map-section {
                 grid-template-columns: 1fr;
             }
         }
@@ -453,134 +664,196 @@
             .header {
                 flex-direction: column;
                 text-align: center;
+                padding: 30px 20px;
             }
+            
             .header-left h1 {
-                font-size: 1.8em;
+                font-size: 2em;
             }
-            .content {
-                padding: 20px;
+            
+            .header-right {
+                justify-content: center;
+                width: 100%;
             }
-            .filter-section {
+            
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .filter-item {
                 flex-direction: column;
+                align-items: flex-start;
+                min-width: 100%;
             }
+            
+            .slider {
+                width: 100%;
+            }
+            
             .kpi-grid {
                 grid-template-columns: 1fr;
             }
-            table {
-                font-size: 0.9em;
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
             }
+            
+            .map-section {
+                grid-template-columns: 1fr;
+            }
+            
+            #map {
+                height: 300px;
+            }
+            
+            table {
+                font-size: 0.85em;
+            }
+            
             th, td {
-                padding: 8px 10px;
+                padding: 10px 8px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
+        <!-- HEADER -->
         <div class="header">
             <div class="header-left">
                 <h1>🏥 BILIK GERAKAN</h1>
-                <p style="margin: 0; opacity: 0.9;">Health Intelligence Dashboard</p>
+                <p>Sistem Maklumat Kesihatan Pintar</p>
             </div>
             <div class="header-right">
-                <div class="status-indicator">
-                    <div class="pulse-dot"></div>
-                    <span>Aktif Sekarang</span>
+                <div class="status-card">
+                    <div class="status-dot"></div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.95em;">Sistem Aktif</div>
+                        <div style="opacity: 0.8; font-size: 0.85em;">Real-time Monitoring</div>
+                    </div>
                 </div>
-                <div style="text-align: right; opacity: 0.9;">
-                    <div style="font-weight: 600;">Dibina oleh</div>
-                    <div>Health Analytics Team</div>
+                <div class="status-card">
+                    <i class="fas fa-user"></i>
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.95em;">Pemerhati</div>
+                        <div style="opacity: 0.8; font-size: 0.85em;">Health Analytics Team</div>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Content -->
-        <div class="content">
-            <!-- Filter Section -->
-            <div class="filter-section">
+        <!-- MAIN GRID -->
+        <div class="main-grid">
+            <!-- FILTER SECTION -->
+            <div class="filter-card">
+                <div class="filter-title">
+                    <i class="fas fa-sliders-h"></i>
+                    Tapisan & Pemilehan Data
+                </div>
                 <div class="filter-group">
-                    <label class="filter-label">📅 Slicer Minggu Epid:</label>
-                    <input type="range" id="weekSlider" min="0" max="52" value="0" class="slider">
-                    <span class="filter-value" id="filterValue">Semua</span>
-                </div>
-                <button class="clear-btn" id="clearBtn">❌ Batal Semua Tapisan Silang</button>
-            </div>
-            
-            <!-- KPI Cards -->
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-label">📊 Jumlah Kes</div>
-                    <div class="kpi-value" id="totalCases">0</div>
-                    <div class="kpi-change">Kes Berdaftar</div>
-                </div>
-                
-                <div class="kpi-card">
-                    <div class="kpi-label">🔴 Diagnosis Tertinggi</div>
-                    <div class="kpi-value" id="topDiagnosis" style="font-size: 1.5em;">-</div>
-                    <div class="kpi-change">Paling Banyak</div>
-                </div>
-                
-                <div class="kpi-card">
-                    <div class="kpi-label">📍 Lokaliti Terjejas</div>
-                    <div class="kpi-value" id="affectedLocations">0</div>
-                    <div class="kpi-change">Kawasan</div>
-                </div>
-                
-                <div class="kpi-card">
-                    <div class="kpi-label">⏰ Kemas Kini Terakhir</div>
-                    <div class="kpi-value" id="lastUpdate" style="font-size: 1.1em;">--:--</div>
-                    <div class="kpi-change">Masa Terkini</div>
+                    <div class="filter-item">
+                        <label class="filter-label"><i class="fas fa-calendar"></i> Minggu Epidemiologi:</label>
+                        <input type="range" id="weekSlider" min="0" max="52" value="0" class="slider">
+                        <span class="filter-value" id="filterValue">Semua</span>
+                    </div>
+                    <button class="clear-btn" id="clearBtn"><i class="fas fa-times"></i> Batal Semua Filter</button>
                 </div>
             </div>
             
-            <!-- Charts -->
-            <div class="charts-grid">
-                <!-- Diagnosis Chart -->
-                <div class="chart-card">
-                    <div class="chart-title">📊 Analisis Diagnosis (Klik untuk Filter)</div>
-                    <div class="chart-container">
-                        <canvas id="diagnosisChart"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Gender Chart -->
-                <div class="chart-card">
-                    <div class="chart-title">👥 Taburan Jantina (Klik untuk Filter)</div>
-                    <div class="chart-container">
-                        <canvas id="genderChart"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Age Chart -->
-                <div class="chart-card">
-                    <div class="chart-title">📈 Kumpulan Umur (Klik untuk Filter)</div>
-                    <div class="chart-container">
-                        <canvas id="ageChart"></canvas>
-                    </div>
-                </div>
+            <!-- KPI CARDS -->
+            <div class="kpi-card">
+                <div class="kpi-icon">📊</div>
+                <div class="kpi-label">Jumlah Kes</div>
+                <div class="kpi-value" id="totalCases">0</div>
+                <div class="kpi-change">Kes Berdaftar</div>
             </div>
             
-            <!-- Map & Recent -->
+            <div class="kpi-card">
+                <div class="kpi-icon">🔴</div>
+                <div class="kpi-label">Diagnosis Tertinggi</div>
+                <div class="kpi-value" id="topDiagnosis" style="font-size: 1.5em;">-</div>
+                <div class="kpi-change">Paling Banyak</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon">📍</div>
+                <div class="kpi-label">Kawasan Terjejas</div>
+                <div class="kpi-value" id="affectedLocations">0</div>
+                <div class="kpi-change">Bilangan Lokasi</div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon">⏰</div>
+                <div class="kpi-label">Kemaskini Terakhir</div>
+                <div class="kpi-value" id="lastUpdate" style="font-size: 1.6em;">--:--</div>
+                <div class="kpi-change">Masa Sebenar</div>
+            </div>
+            
+            <!-- CHARTS -->
+            <div class="chart-card interactive">
+                <div class="chart-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Analisis Diagnosis
+                </div>
+                <div class="chart-container">
+                    <canvas id="diagnosisChart"></canvas>
+                </div>
+                <small style="color: var(--gray-500); margin-top: 10px;">💡 Klik untuk filter berdasarkan diagnosis</small>
+            </div>
+            
+            <div class="chart-card interactive">
+                <div class="chart-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Taburan Jantina
+                </div>
+                <div class="chart-container">
+                    <canvas id="genderChart"></canvas>
+                </div>
+                <small style="color: var(--gray-500); margin-top: 10px;">💡 Klik untuk filter berdasarkan jantina</small>
+            </div>
+            
+            <div class="chart-card interactive">
+                <div class="chart-title">
+                    <i class="fas fa-chart-line"></i>
+                    Kumpulan Umur
+                </div>
+                <div class="chart-container">
+                    <canvas id="ageChart"></canvas>
+                </div>
+                <small style="color: var(--gray-500); margin-top: 10px;">💡 Klik untuk filter berdasarkan umur</small>
+            </div>
+            
+            <!-- MAP & SIDEBAR -->
             <div class="map-section">
                 <div class="map-card">
-                    <div class="chart-title">🗺️ Peta Taburan Kes (Klik Penanda untuk Filter)</div>
+                    <div class="chart-title">
+                        <i class="fas fa-map"></i>
+                        Peta Taburan Kes Geografik
+                    </div>
                     <div id="map"></div>
+                    <small style="color: var(--gray-500); margin-top: 15px; display: block;">💡 Klik pada penanda untuk filter berdasarkan lokasi</small>
                 </div>
                 
-                <div class="recent-card">
-                    <div class="chart-title">📝 5 Pendaftaran Terkini</div>
+                <div class="sidebar-card">
+                    <div class="sidebar-title">
+                        <i class="fas fa-history"></i>
+                        Pendaftaran Terkini
+                    </div>
                     <div class="recent-list" id="recentList"></div>
                 </div>
             </div>
             
-            <!-- Master Table -->
+            <!-- TABLE -->
             <div class="table-section">
-                <div class="table-card">
-                    <div class="table-header">
-                        <div class="table-title">📋 Jadual Induk - Maklumat Lengkap Pesakit</div>
-                        <button class="clear-btn" id="clearBtn2">❌ Batal Semua Tapisan Silang</button>
+                <div class="table-header">
+                    <div class="table-title">
+                        <i class="fas fa-table"></i>
+                        Jadual Maklumat Lengkap
                     </div>
+                    <button class="clear-btn" id="clearBtn2" style="display: none;"><i class="fas fa-times"></i> Batal Filter</button>
+                </div>
+                <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
@@ -589,7 +862,7 @@
                                 <th>Diagnosis</th>
                                 <th>Jantina</th>
                                 <th>Umur</th>
-                                <th>Kumpulan Umur</th>
+                                <th>Kumpulan</th>
                                 <th>Lokasi</th>
                                 <th>Status</th>
                                 <th>Severity</th>
@@ -597,20 +870,20 @@
                         </thead>
                         <tbody id="tableBody"></tbody>
                     </table>
-                    <div class="pagination" id="pagination"></div>
                 </div>
+                <div class="pagination" id="pagination"></div>
             </div>
             
-            <!-- Footer -->
+            <!-- FOOTER -->
             <div class="footer">
-                <p>🏥 BILIK GERAKAN - Health Intelligence Dashboard</p>
-                <small>Powered by Chart.js | Leaflet Map | HTML5 + JavaScript</small>
+                <p>🏥 BILIK GERAKAN - Sistem Maklumat Kesihatan Bersepadu</p>
+                <small>Diperkasa oleh Chart.js | Leaflet Maps | HTML5 + JavaScript | © 2024 Health Analytics</small>
             </div>
         </div>
     </div>
     
     <script>
-        // ===== DATA GENERATION & INJECTION =====
+        // ===== DATA GENERATION =====
         function generateData() {
             const diseases = ['Demam Berdarah', 'Influenza', 'COVID-19', 'Malaria', 'Typhoid'];
             const locations = ['Kuala Lumpur', 'Shah Alam', 'Petaling Jaya', 'Klang', 'Subang', 'Ampang', 'Selayang'];
@@ -663,7 +936,7 @@
             'Typhoid': '#8b5cf6'
         };
         
-        // ===== UTILITY FUNCTIONS =====
+        // ===== UPDATE KPIs =====
         function updateKPIs() {
             document.getElementById('totalCases').textContent = filteredData.length;
             
@@ -678,12 +951,7 @@
                 new Set(filteredData.map(d => d.Lokasi)).size;
         }
         
-        function updateCharts() {
-            updateDiagnosisChart();
-            updateGenderChart();
-            updateAgeChart();
-        }
-        
+        // ===== UPDATE CHARTS =====
         function updateDiagnosisChart() {
             const diagCounts = {};
             filteredData.forEach(d => {
@@ -703,9 +971,10 @@
                         label: 'Bilangan Kes',
                         data: Object.values(diagCounts),
                         backgroundColor: colors,
-                        borderColor: colors.map(c => c + '80'),
+                        borderColor: colors.map(c => c + '40'),
                         borderWidth: 2,
-                        borderRadius: 8
+                        borderRadius: 8,
+                        borderSkipped: false
                     }]
                 },
                 options: {
@@ -721,19 +990,13 @@
                             align: 'end'
                         }
                     },
-                    scales: { x: { beginAtZero: true } }
+                    scales: { 
+                        x: { beginAtZero: true, grid: { display: false } },
+                        y: { grid: { display: false } }
+                    }
                 },
                 plugins: [ChartDataLabels]
             });
-            
-            document.getElementById('diagnosisChart').onclick = (e) => {
-                const points = charts.diagnosis.getElementsAtEventForMode(e, 'nearest', 
-                    { intersect: true }, true);
-                if (points.length > 0) {
-                    const diagnosis = Object.keys(diagCounts)[points[0].index];
-                    filterByDiagnosis(diagnosis);
-                }
-            };
         }
         
         function updateGenderChart() {
@@ -753,7 +1016,7 @@
                         data: Object.values(genderCounts),
                         backgroundColor: ['#ef4444', '#3b82f6'],
                         borderColor: '#fff',
-                        borderWidth: 3
+                        borderWidth: 4
                     }]
                 },
                 options: {
@@ -770,15 +1033,6 @@
                 },
                 plugins: [ChartDataLabels]
             });
-            
-            document.getElementById('genderChart').onclick = (e) => {
-                const points = charts.gender.getElementsAtEventForMode(e, 'nearest', 
-                    { intersect: true }, true);
-                if (points.length > 0) {
-                    const gender = Object.keys(genderCounts)[points[0].index];
-                    filterByGender(gender);
-                }
-            };
         }
         
         function updateAgeChart() {
@@ -803,7 +1057,8 @@
                         backgroundColor: ['#3b82f6', '#f59e0b', '#8b5cf6'],
                         borderColor: ['#1e40af', '#d97706', '#6d28d9'],
                         borderWidth: 2,
-                        borderRadius: 8
+                        borderRadius: 8,
+                        borderSkipped: false
                     }]
                 },
                 options: {
@@ -818,19 +1073,13 @@
                             align: 'top'
                         }
                     },
-                    scales: { y: { beginAtZero: true } }
+                    scales: { 
+                        y: { beginAtZero: true, grid: { display: false } },
+                        x: { grid: { display: false } }
+                    }
                 },
                 plugins: [ChartDataLabels]
             });
-            
-            document.getElementById('ageChart').onclick = (e) => {
-                const points = charts.age.getElementsAtEventForMode(e, 'nearest', 
-                    { intersect: true }, true);
-                if (points.length > 0) {
-                    const ageGroup = labels[points[0].index];
-                    filterByAgeGroup(ageGroup);
-                }
-            };
         }
         
         function updateMap() {
@@ -864,13 +1113,11 @@
                     fillOpacity: 0.7
                 });
                 
-                circle.bindPopup(`<strong>${loc.diagnosis}</strong><br>Kes: ${loc.count}`);
+                circle.bindPopup(`<strong>${loc.diagnosis}</strong><br><strong>Kes:</strong> ${loc.count}`);
                 circle.addTo(map);
-                
                 circle.on('click', () => {
                     filterByLocation(loc.lat, loc.lng);
                 });
-                
                 markers.push(circle);
             });
         }
@@ -879,12 +1126,12 @@
             const recent = filteredData.slice(-5).reverse();
             const html = recent.map(r => `
                 <div class="recent-item">
-                    <div class="recent-name">${r.Nama}</div>
                     <div class="recent-diagnosis">${r.Diagnosis}</div>
-                    <div style="font-size: 0.8em; color: #6b7280;">📍 ${r.Lokasi}</div>
+                    <div class="recent-name">${r.Nama}</div>
+                    <div class="recent-location"><i class="fas fa-map-marker-alt"></i> ${r.Lokasi}</div>
                 </div>
             `).join('');
-            document.getElementById('recentList').innerHTML = html || '<p style="color: #6b7280;">No records</p>';
+            document.getElementById('recentList').innerHTML = html || '<p style="color: var(--gray-500); text-align: center; padding: 20px;">Tiada rekod</p>';
         }
         
         function updateTable() {
@@ -892,19 +1139,26 @@
             const end = start + rowsPerPage;
             const pageData = filteredData.slice(start, end);
             
-            const html = pageData.map((r, i) => `
-                <tr>
-                    <td>${start + i + 1}</td>
-                    <td>${r.Nama}</td>
-                    <td>${r.Diagnosis}</td>
-                    <td>${r.Jantina}</td>
-                    <td>${r.Umur}</td>
-                    <td>${r.Umur_Kumpulan}</td>
-                    <td>${r.Lokasi}</td>
-                    <td>${r.Status}</td>
-                    <td>${r.Severity}/10</td>
-                </tr>
-            `).join('');
+            const html = pageData.map((r, i) => {
+                let severityClass = 'severity-low';
+                if (r.Severity >= 8) severityClass = 'severity-critical';
+                else if (r.Severity >= 6) severityClass = 'severity-high';
+                else if (r.Severity >= 4) severityClass = 'severity-medium';
+                
+                return `
+                    <tr>
+                        <td>${start + i + 1}</td>
+                        <td><strong>${r.Nama}</strong></td>
+                        <td>${r.Diagnosis}</td>
+                        <td>${r.Jantina}</td>
+                        <td>${r.Umur} thn</td>
+                        <td>${r.Umur_Kumpulan}</td>
+                        <td>${r.Lokasi}</td>
+                        <td><strong>${r.Status}</strong></td>
+                        <td><span class="${severityClass}">${r.Severity}/10</span></td>
+                    </tr>
+                `;
+            }).join('');
             
             document.getElementById('tableBody').innerHTML = html;
             
@@ -958,7 +1212,9 @@
             
             currentPage = 1;
             updateKPIs();
-            updateCharts();
+            updateDiagnosisChart();
+            updateGenderChart();
+            updateAgeChart();
             updateMap();
             updateRecent();
             updateTable();
@@ -971,7 +1227,9 @@
             document.getElementById('weekSlider').value = 0;
             document.getElementById('filterValue').textContent = 'Semua';
             updateKPIs();
-            updateCharts();
+            updateDiagnosisChart();
+            updateGenderChart();
+            updateAgeChart();
             updateMap();
             updateRecent();
             updateTable();
@@ -1007,7 +1265,6 @@
         
         // ===== INITIALIZATION =====
         function initializeDashboard() {
-            // Initialize map
             if (!map) {
                 map = L.map('map').setView([3.1357, 101.6869], 11);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1016,20 +1273,17 @@
                 }).addTo(map);
             }
             
-            // Update all components
             document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('ms-MY');
             updateKPIs();
-            updateCharts();
+            updateDiagnosisChart();
+            updateGenderChart();
+            updateAgeChart();
             updateMap();
             updateRecent();
             updateTable();
             updateClearButton();
-            
-            console.log('✓ Dashboard initialized successfully');
-            console.log('Total Records:', allData.length);
         }
         
-        // Initialize after page loads
         window.addEventListener('load', () => {
             setTimeout(initializeDashboard, 300);
         });
